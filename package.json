@@ -1,0 +1,53 @@
+{
+  "dependencies": {
+    "async": "^3.2.5",
+    "axios": "^1.6.8",
+    "axios-retry": "^4.1.0",
+    "bcrypt": "^5.1.0",
+    "body-parser": "^1.20.1",
+    "cheerio": "^1.0.0-rc.12",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-fileupload": "^1.4.3",
+    "jsonwebtoken": "^9.0.0",
+    "jwt-decode": "^3.1.2",
+    "moment": "^2.30.1",
+    "mysql2": "^3.9.2",
+    "nodemon": "^2.0.20",
+    "scrapfly-sdk": "^0.4.0",
+    "socket.io": "^4.6.0",
+    "ts-node": "^10.9.1",
+    "utf8": "^3.0.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/async": "^3.2.24",
+    "@types/bcrypt": "^5.0.0",
+    "@types/body-parser": "^1.19.2",
+    "@types/cookie-parser": "^1.4.3",
+    "@types/cors": "^2.8.13",
+    "@types/express": "^4.17.15",
+    "@types/express-fileupload": "^1.4.1",
+    "@types/jsonwebtoken": "^9.0.1",
+    "@types/node": "^14.18.36",
+    "@types/utf8": "^3.0.3",
+    "@types/uuid": "^9.0.8",
+    "cpy-cli": "^4.2.0",
+    "typescript": "^4.9.5"
+  },
+  "name": "vite-lotto-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node dist/server.js",
+    "dev": "nodemon src/server.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

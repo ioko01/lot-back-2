@@ -1,0 +1,122 @@
+@auth=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVSUQiOiJlOTg1M2FhMS1kODlkLTRkZjQtODY4My03MTNmYzJmMjBkZTIiLCJ0b2tlblZlcnNpb24iOjgsInJvbGUiOiJBRE1JTiIsImlhdCI6MTcxNjkwNjgyMCwiZXhwIjoxNzE2OTA4NjIwfQ.cEoaI-iBkGE2afl2s7LhmLxMvoWBvXXWe4YoIXR1ckI
+
+POST http://localhost:8080/initial-database
+content-type: application/json
+
+
+###
+POST http://localhost:8080/add/admin
+content-type: application/json
+
+{
+    "username": "admin01",
+    "password": "12345678",
+    "fullname": "admin"
+}
+
+###
+GET http://localhost:8080/get/file/jones.jpg
+Authorization: {{auth}}
+
+
+###
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+    "username": "admin01",
+    "u_password": "12345678"
+}
+
+###
+GET http://localhost:8080/result/api
+Authorization: {{auth}}
+
+
+###
+POST http://localhost:8080/auth/logout
+Authorization: {{auth}}
+Content-Type: application/json
+
+{
+    "username": "admin01"
+}
+
+###
+POST http://localhost:8080/add/lotto
+Authorization: {{auth}}
+content-type: application/json
+
+{
+    "name": "ดาวน์โจนส์ VIP",
+    "img_flag": "jonevip.jpg",
+    "open": "2023-01-19 06.00",
+    "close": "2023-01-19 00.10",
+    "report": "2023-01-19 00.30",
+    "status": "OPEN"
+}
+
+###
+DELETE http://localhost:8080/delete/lotto
+Authorization: {{auth}}
+content-type: application/json
+
+{
+    "id": "LKyASx2SgDOtGFioWDT3"
+}
+
+###
+GET http://localhost:8080/get/lotto/all
+Authorization: {{auth}}
+
+###
+POST http://localhost:8080/add/agent
+Authorization: {{auth}}
+content-type: application/json
+
+{
+    "username": "agent01",
+    "password": "123456789",
+    "fullname": "agent",
+    "credit": 0
+}
+
+###
+POST http://localhost:8080/add/member
+Authorization: {{auth}}
+content-type: application/json
+
+{
+    "username": "member1111",
+    "password": "123456789",
+    "fullname": "member11111111111",
+    "credit": 0,
+    "store_id": "3RDYTBqOjervu82IKQXm",
+    "agent_create_id": "pSJ2jiwWPMj7ksCQG5wV",
+    "admin_create_id": "6hiiaTWELnSOk0XbXb43",
+    "manager_create_id": "9pxJRIMKeNIRhqJlMDcZ",
+    "role": "MEMBER",
+    "status": "REGULAR"
+}
+
+###
+GET http://localhost:8080/get/bill/all
+Authorization: {{auth}}
+
+###
+GET http://localhost:8080/get/user/me
+Authorization: {{auth}}
+
+###
+GET http://localhost:8080/get/user/all
+Authorization: {{auth}}
+
+###
+PUT http://localhost:8080/update/status/agent
+Authorization: {{auth}}
+content-type: application/json
+
+{
+    "id": "85MI669pD37GGckaKAxh",
+    "status": "REGULAR"
+}
