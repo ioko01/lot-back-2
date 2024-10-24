@@ -8,11 +8,14 @@ import { GMT } from '../utils/time';
 import { IRateDoc } from '../models/Id';
 import { v4 } from 'uuid';
 import { ICommission, ICommissionMySQL } from '../models/Commission';
-import { connection } from '../utils/database';
 import { ApiStore } from './store';
 import { authenticate } from '../middleware/authenticate';
 import axios from 'axios';
 import { IStoreMySQL } from '../models/Store';
+import { createPool } from 'mysql2';
+import { config } from "dotenv";
+import { connections } from '../utils/database';
+config()
 
 const Helpers = new HelperController()
 
@@ -112,11 +115,22 @@ export class ApiRateTemplate {
                                         rates_template.store_id = ?
                                     `
                         const fields = ["rates_template", "rates_template.user_create_id", "users.user_id", "commissions.commission_id", store]
-
-                        connection.query(sql, fields, async (err, result, field) => {
-                            if (err) return res.status(202).json(err);
-                            return res.json(JSON.parse(JSON.stringify(result)))
+                        // const connection = createPool({
+                        //     host: process.env.VITE_OPS_DATABASE_HOST,
+                        //     user: process.env.VITE_OPS_DATABASE_USERNAME,
+                        //     password: process.env.VITE_OPS_DATABASE_PASSWORD,
+                        //     database: process.env.VITE_OPS_DATABASE_NAME,
+                        //     port: parseInt(process.env.VITE_OPS_DATABASE_PORT!),
+                        // })
+                        connections.getConnection((err, connection) => {
+                            connection.query(sql, fields, async (err, result, field) => {
+                                connection.release();
+                                if (err) return res.status(202).json(err);
+                                return res.json(JSON.parse(JSON.stringify(result)))
+                            });
+                            connection.release();
                         });
+
                         // const rates = await Helpers.select_database_left_join_where(["rates_template"], attr, join, where)
                         // if (!rates) return res.status(202).json({ message: "don't have rate" })
                         // return res.json(rates)

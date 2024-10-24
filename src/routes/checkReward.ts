@@ -10,8 +10,11 @@ import { ILottoMySQL } from '../models/Lotto';
 import { v4 } from 'uuid';
 import { IBillMySQL, TBillStatus } from '../models/Bill';
 import moment from 'moment';
-import { connection } from '../utils/database';
 import { IDigitSemiMySQL } from '../models/DigitSemi';
+import { createPool } from 'mysql2';
+import { config } from "dotenv";
+import { connections } from '../utils/database';
+config()
 
 const Helpers = new HelperController()
 
@@ -70,10 +73,22 @@ export class ApiCheckReward {
                         if (authorize.role == "ADMIN") store_id = store
                         const sql = `SELECT ${attr} FROM ?? LEFT JOIN lottos ON lottos.lotto_id = check_rewards.lotto_id AND lottos.store_id = ? WHERE times >= ? AND times <= ?`
                         const fields = ["check_rewards", store_id, new Date(date_start.toUTCString()), new Date(date_end.toUTCString())]
-                        connection.query(sql, fields, (err, result, field) => {
-                            if (err) return res.status(202).json(err);
-                            return res.json(JSON.parse(JSON.stringify(result)))
+                        // const connection = createPool({
+                        //     host: process.env.VITE_OPS_DATABASE_HOST,
+                        //     user: process.env.VITE_OPS_DATABASE_USERNAME,
+                        //     password: process.env.VITE_OPS_DATABASE_PASSWORD,
+                        //     database: process.env.VITE_OPS_DATABASE_NAME,
+                        //     port: parseInt(process.env.VITE_OPS_DATABASE_PORT!),
+                        // })
+                        connections.getConnection((err, connection) => {
+                            connection.query(sql, fields, (err, result, field) => {
+                                connection.release();
+                                if (err) return res.status(202).json(err);
+                                return res.json(JSON.parse(JSON.stringify(result)))
+                            });
+                            connection.release();
                         });
+
                     } else {
                         return res.sendStatus(authorize)
                     }
@@ -226,7 +241,7 @@ export class ApiCheckReward {
     }
 
 
-    calculateReward = (one_digits: string[], two_digits: string[], three_digits: string[], reward_top: string, reward_bottom_or_toad: string, rt_one_digits: string, rt_two_digits: string, rt_three_digits: string, digits_semi?: IDigitSemiMySQL) => {
+    calculateReward = (one_digits: string[], two_digits: string[], three_digits: string[], reward_top: string, reward_bottom_or_toad: string, rt_one_digits: string, rt_two_digits: string, rt_three_digits: string) => {
         let bill_reward: Reward = {
             id: "",
             status: "REWARD",
@@ -235,21 +250,11 @@ export class ApiCheckReward {
         one_digits?.map(digit => {
             const ONE = digit.split(":")
             if (reward_top?.match(ONE[0])) {
-                let p = 0
-                if (digits_semi) {
-                    if (JSON.parse(digits_semi.one_digits as string).top.includes(ONE[0])) p = parseInt(JSON.parse(rt_one_digits).top!) / 2 ?? 0
-                } else {
-                    p = parseInt(JSON.parse(rt_one_digits).top!) ?? 0
-                }
+                const p = parseInt(JSON.parse(rt_one_digits).top!) ?? 0
                 bill_reward.total_win += parseInt(ONE[1]) * p
             }
             if (reward_bottom_or_toad?.match(ONE[0])) {
-                let p = 0
-                if (digits_semi) {
-                    if (JSON.parse(digits_semi.one_digits as string).bottom.includes(ONE[0])) p = parseInt(JSON.parse(rt_one_digits).bottom!) / 2 ?? 0
-                } else {
-                    p = parseInt(JSON.parse(rt_one_digits).bottom!) ?? 0
-                }
+                const p = parseInt(JSON.parse(rt_one_digits).bottom!) ?? 0
                 bill_reward.total_win += parseInt(ONE[2]) * p
             }
         })
@@ -257,21 +262,11 @@ export class ApiCheckReward {
         two_digits?.map(digit => {
             const TWO = digit.split(":")
             if (reward_top?.substring(1).match(TWO[0])) {
-                let p = 0
-                if (digits_semi) {
-                    if (JSON.parse(digits_semi.two_digits as string).top.includes(TWO[0])) p = parseInt(JSON.parse(rt_two_digits).top!) / 2 ?? 0
-                } else {
-                    p = parseInt(JSON.parse(rt_two_digits).top!) ?? 0
-                }
+                const p = parseInt(JSON.parse(rt_two_digits).top!) ?? 0
                 bill_reward.total_win += parseInt(TWO[1]) * p
             }
             if (reward_bottom_or_toad?.match(TWO[0])) {
-                let p = 0
-                if (digits_semi) {
-                    if (JSON.parse(digits_semi.two_digits as string).bottom.includes(TWO[0])) p = parseInt(JSON.parse(rt_two_digits).bottom!) / 2 ?? 0
-                } else {
-                    p = parseInt(JSON.parse(rt_two_digits).bottom!) ?? 0
-                }
+                const p = parseInt(JSON.parse(rt_two_digits).bottom!) ?? 0
                 bill_reward.total_win += parseInt(TWO[2]) * p
             }
         })
@@ -281,21 +276,11 @@ export class ApiCheckReward {
             const THREE = digit.split(":")
             if (reward_top?.match(THREE[0])) {
                 if (THREE[1] != "0") {
-                    let p = 0
-                    if (digits_semi) {
-                        if (JSON.parse(digits_semi.three_digits as string).top.includes(THREE[0])) p = parseInt(JSON.parse(rt_three_digits).top!) / 2 ?? 0
-                    } else {
-                        p = parseInt(JSON.parse(rt_three_digits).top!) ?? 0
-                    }
+                    const p = parseInt(JSON.parse(rt_three_digits).top!) ?? 0
                     bill_reward.total_win += parseInt(THREE[1]) * p
                 }
                 if (THREE[2] != "0") {
-                    let p = 0
-                    if (digits_semi) {
-                        if (JSON.parse(digits_semi.three_digits as string).toad.includes(THREE[0])) p = parseInt(JSON.parse(rt_three_digits).toad!) / 2 ?? 0
-                    } else {
-                        p = parseInt(JSON.parse(rt_three_digits).toad!) ?? 0
-                    }
+                    const p = parseInt(JSON.parse(rt_three_digits).toad!) ?? 0
                     bill_reward.total_win += parseInt(THREE[2]) * p
                 }
             } else {
@@ -379,8 +364,8 @@ export class ApiCheckReward {
                         ]
                         const [checkLotto] = await Helpers.select_database_where("check_rewards", "lotto_id, check_reward_id", where) as ICheckRewardMySQL[]
 
-                        const attr_semi = "digit_semi_id, times, one_digits, two_digits, three_digits, lotto_id AS l_id, percent"
-                        const [digitSemi] = await Helpers.select_database_where("digits_semi", attr_semi, [["times", ">=", date_start], ["times", "<=", date_end], ["lotto_id", "=", data.l_id]]) as IDigitSemiMySQL[]
+                        // const attr_semi = "digit_semi_id, times, one_digits, two_digits, three_digits, lotto_id AS l_id, percent"
+                        // const [digitSemi] = await Helpers.select_database_where("digits_semi", attr_semi, [["times", ">=", date_start], ["times", "<=", date_end], ["lotto_id", "=", data.l_id]]) as IDigitSemiMySQL[]
 
                         if (checkLotto) {
                             const attr = [
@@ -395,54 +380,66 @@ export class ApiCheckReward {
                             ]
                             await Helpers.update_database_where("check_rewards", attr, where)
                                 .then(async () => {
-                                    connection.query(sql, fields, async (err, result, field) => {
+                                    // const connection = createPool({
+                                    //     host: process.env.VITE_OPS_DATABASE_HOST,
+                                    //     user: process.env.VITE_OPS_DATABASE_USERNAME,
+                                    //     password: process.env.VITE_OPS_DATABASE_PASSWORD,
+                                    //     database: process.env.VITE_OPS_DATABASE_NAME,
+                                    //     port: parseInt(process.env.VITE_OPS_DATABASE_PORT!),
+                                    // })
+                                    connections.getConnection((err, connection) => {
+                                        connection.query(sql, fields, async (err, result, field) => {
+                                            connection.release();
 
-                                        let rt_one_digits = 0
-                                        let rt_two_digits = 0
-                                        let rt_three_digits = 0
-                                        let promotion = false
+                                            let rt_one_digits = 0
+                                            let rt_two_digits = 0
+                                            let rt_three_digits = 0
+                                            let promotion = false
 
-                                        if (err) return res.status(202).json(err);
-                                        if (result && JSON.parse(JSON.stringify(result))[0]?.p_promotion.includes(days[new Date(data.times).getUTCDay()]) && lotto.promotion == "USED") {
-                                            promotion = true
-                                            rt_one_digits = JSON.parse(JSON.stringify(result))[0]?.rt_one_digits
-                                            rt_two_digits = JSON.parse(JSON.stringify(result))[0]?.rt_two_digits
-                                            rt_three_digits = JSON.parse(JSON.stringify(result))[0]?.rt_three_digits
-                                        }
-
-                                        const attr_bill2 = "bills.bill_id AS b_id, bills.rate_id AS b_rate_id, times, bills.one_digits AS b_one_digits, bills.two_digits AS b_two_digits, bills.three_digits AS b_three_digits, "
-                                        const attr_rates_template2 = "rates_template.one_digits AS rt_one_digits, rates_template.two_digits AS rt_two_digits, rates_template.three_digits AS rt_three_digits, bet_one_digits, bet_two_digits, bet_three_digits"
-                                        const attr2 = attr_bill2 + attr_rates_template2
-
-                                        const join2 = [
-                                            ["rates_template", "rates_template.rate_template_id", "=", "rates.rate_template_id"]
-                                        ];
-
-                                        const where2 = [
-                                            ["bills.lotto_id", "=", data.l_id],
-                                            ["times", ">=", date_start],
-                                            ["times", "<=", date_end],
-                                            ["status", "=", "REWARD"],
-                                            ["rates.lotto_id", "=", data.l_id]
-                                        ]
-
-                                        const bills = await Helpers.select_database_left_join_where(["bills", "rates"], attr2, join2, where2) as IBillMySQL[]
-                                        bills.map(async (bill) => {
-                                            if (!promotion) {
-                                                rt_one_digits = bill.rt_one_digits
-                                                rt_two_digits = bill.rt_two_digits
-                                                rt_three_digits = bill.rt_three_digits
+                                            if (err) return res.status(202).json(err);
+                                            if (result && JSON.parse(JSON.stringify(result))[0]?.p_promotion.includes(days[new Date(data.times).getUTCDay()]) && lotto.promotion == "USED") {
+                                                promotion = true
+                                                rt_one_digits = JSON.parse(JSON.stringify(result))[0]?.rt_one_digits
+                                                rt_two_digits = JSON.parse(JSON.stringify(result))[0]?.rt_two_digits
+                                                rt_three_digits = JSON.parse(JSON.stringify(result))[0]?.rt_three_digits
                                             }
-                                            const price = this.calculateReward(JSON.parse(bill.b_one_digits!), JSON.parse(bill.b_two_digits!), JSON.parse(bill.b_three_digits!), data.top, data.bottom, rt_one_digits.toString(), rt_two_digits.toString(), rt_three_digits.toString(), digitSemi)
-                                            const attr = [["win", "=", price.total_win]]
-                                            const where = [
-                                                ["status", "!=", "CANCEL"],
-                                                ["bill_id", "=", bill.b_id]
-                                            ]
-                                            await Helpers.update_database_where("bills", attr, where)
-                                        })
 
+                                            const attr_bill2 = "bills.bill_id AS b_id, bills.rate_id AS b_rate_id, times, bills.one_digits AS b_one_digits, bills.two_digits AS b_two_digits, bills.three_digits AS b_three_digits, "
+                                            const attr_rates_template2 = "rates_template.one_digits AS rt_one_digits, rates_template.two_digits AS rt_two_digits, rates_template.three_digits AS rt_three_digits, bet_one_digits, bet_two_digits, bet_three_digits"
+                                            const attr2 = attr_bill2 + attr_rates_template2
+
+                                            const join2 = [
+                                                ["rates_template", "rates_template.rate_template_id", "=", "rates.rate_template_id"]
+                                            ];
+
+                                            const where2 = [
+                                                ["bills.lotto_id", "=", data.l_id],
+                                                ["times", ">=", date_start],
+                                                ["times", "<=", date_end],
+                                                ["status", "=", "REWARD"],
+                                                ["rates.lotto_id", "=", data.l_id]
+                                            ]
+
+                                            const bills = await Helpers.select_database_left_join_where(["bills", "rates"], attr2, join2, where2) as IBillMySQL[]
+                                            bills.map(async (bill) => {
+                                                if (!promotion) {
+                                                    rt_one_digits = bill.rt_one_digits
+                                                    rt_two_digits = bill.rt_two_digits
+                                                    rt_three_digits = bill.rt_three_digits
+                                                }
+                                                const price = this.calculateReward(JSON.parse(bill.b_one_digits!), JSON.parse(bill.b_two_digits!), JSON.parse(bill.b_three_digits!), data.top, data.bottom, rt_one_digits.toString(), rt_two_digits.toString(), rt_three_digits.toString())
+                                                const attr = [["win", "=", price.total_win]]
+                                                const where = [
+                                                    ["status", "!=", "CANCEL"],
+                                                    ["bill_id", "=", bill.b_id]
+                                                ]
+                                                await Helpers.update_database_where("bills", attr, where)
+                                            })
+
+                                        });
+                                        connection.release();
                                     });
+
 
                                     const attr = [["status", "=", "REWARD"]]
                                     const where = [
@@ -466,54 +463,66 @@ export class ApiCheckReward {
                             const value2 = [v4(), data.l_id, data.top, data.bottom, date_start, authorize.user_id]
                             await Helpers.insert_database("check_rewards", attr2, value2)
                                 .then(async () => {
-                                    connection.query(sql, fields, async (err, result, field) => {
-                                        let rt_one_digits = 0
-                                        let rt_two_digits = 0
-                                        let rt_three_digits = 0
-                                        let promotion = false
+                                    // const connection = createPool({
+                                    //     host: process.env.VITE_OPS_DATABASE_HOST,
+                                    //     user: process.env.VITE_OPS_DATABASE_USERNAME,
+                                    //     password: process.env.VITE_OPS_DATABASE_PASSWORD,
+                                    //     database: process.env.VITE_OPS_DATABASE_NAME,
+                                    //     port: parseInt(process.env.VITE_OPS_DATABASE_PORT!),
+                                    // })
+                                    connections.getConnection((err, connection) => {
+                                        connection.query(sql, fields, async (err, result, field) => {
+                                            connection.release()
+                                            let rt_one_digits = 0
+                                            let rt_two_digits = 0
+                                            let rt_three_digits = 0
+                                            let promotion = false
 
-                                        if (err) return res.status(202).json(err);
-                                        if (result && JSON.parse(JSON.stringify(result))[0]?.p_promotion.includes(days[new Date(data.times).getUTCDay()]) && lotto.promotion == "USED") {
-                                            promotion = true
-                                            rt_one_digits = JSON.parse(JSON.stringify(result))[0]?.rt_one_digits
-                                            rt_two_digits = JSON.parse(JSON.stringify(result))[0]?.rt_two_digits
-                                            rt_three_digits = JSON.parse(JSON.stringify(result))[0]?.rt_three_digits
-                                        }
-
-                                        const attr_bill3 = "bills.bill_id AS b_id, bills.rate_id AS b_rate_id, times, bills.one_digits AS b_one_digits, bills.two_digits AS b_two_digits, bills.three_digits AS b_three_digits, "
-                                        const attr_rates_template3 = "rates_template.one_digits AS rt_one_digits, rates_template.two_digits AS rt_two_digits, rates_template.three_digits AS rt_three_digits, bet_one_digits, bet_two_digits, bet_three_digits"
-                                        const attr3 = attr_bill3 + attr_rates_template3
-
-                                        const join3 = [
-                                            ["rates_template", "rates_template.rate_template_id", "=", "rates.rate_template_id"]
-                                        ];
-
-                                        const where3 = [
-                                            ["bills.lotto_id", "=", data.l_id],
-                                            ["times", ">=", date_start],
-                                            ["times", "<=", date_end],
-                                            ["status", "!=", "CANCEL"],
-                                            ["rates.lotto_id", "=", data.l_id]
-                                        ]
-
-                                        const bills = await Helpers.select_database_left_join_where(["bills", "rates"], attr3, join3, where3) as IBillMySQL[]
-                                        bills.map(async (bill) => {
-                                            if (!promotion) {
-                                                rt_one_digits = bill.rt_one_digits
-                                                rt_two_digits = bill.rt_two_digits
-                                                rt_three_digits = bill.rt_three_digits
+                                            if (err) return res.status(202).json(err);
+                                            if (result && JSON.parse(JSON.stringify(result))[0]?.p_promotion.includes(days[new Date(data.times).getUTCDay()]) && lotto.promotion == "USED") {
+                                                promotion = true
+                                                rt_one_digits = JSON.parse(JSON.stringify(result))[0]?.rt_one_digits
+                                                rt_two_digits = JSON.parse(JSON.stringify(result))[0]?.rt_two_digits
+                                                rt_three_digits = JSON.parse(JSON.stringify(result))[0]?.rt_three_digits
                                             }
-                                            
-                                            const price = this.calculateReward(JSON.parse(bill.b_one_digits!), JSON.parse(bill.b_two_digits!), JSON.parse(bill.b_three_digits!), data.top, data.bottom, rt_one_digits.toString(), rt_two_digits.toString(), rt_three_digits.toString(), digitSemi)
-                                            const attr = [["win", "=", price.total_win]]
-                                            const where = [
-                                                ["status", "!=", "CANCEL"],
-                                                ["bill_id", "=", bill.b_id]
-                                            ]
-                                            await Helpers.update_database_where("bills", attr, where)
-                                        })
 
+                                            const attr_bill3 = "bills.bill_id AS b_id, bills.rate_id AS b_rate_id, times, bills.one_digits AS b_one_digits, bills.two_digits AS b_two_digits, bills.three_digits AS b_three_digits, "
+                                            const attr_rates_template3 = "rates_template.one_digits AS rt_one_digits, rates_template.two_digits AS rt_two_digits, rates_template.three_digits AS rt_three_digits, bet_one_digits, bet_two_digits, bet_three_digits"
+                                            const attr3 = attr_bill3 + attr_rates_template3
+
+                                            const join3 = [
+                                                ["rates_template", "rates_template.rate_template_id", "=", "rates.rate_template_id"]
+                                            ];
+
+                                            const where3 = [
+                                                ["bills.lotto_id", "=", data.l_id],
+                                                ["times", ">=", date_start],
+                                                ["times", "<=", date_end],
+                                                ["status", "!=", "CANCEL"],
+                                                ["rates.lotto_id", "=", data.l_id]
+                                            ]
+
+                                            const bills = await Helpers.select_database_left_join_where(["bills", "rates"], attr3, join3, where3) as IBillMySQL[]
+                                            bills.map(async (bill) => {
+                                                if (!promotion) {
+                                                    rt_one_digits = bill.rt_one_digits
+                                                    rt_two_digits = bill.rt_two_digits
+                                                    rt_three_digits = bill.rt_three_digits
+                                                }
+
+                                                const price = this.calculateReward(JSON.parse(bill.b_one_digits!), JSON.parse(bill.b_two_digits!), JSON.parse(bill.b_three_digits!), data.top, data.bottom, rt_one_digits.toString(), rt_two_digits.toString(), rt_three_digits.toString())
+                                                const attr = [["win", "=", price.total_win]]
+                                                const where = [
+                                                    ["status", "!=", "CANCEL"],
+                                                    ["bill_id", "=", bill.b_id]
+                                                ]
+                                                await Helpers.update_database_where("bills", attr, where)
+                                            })
+
+                                        });
+                                        connection.release();
                                     });
+
 
 
 

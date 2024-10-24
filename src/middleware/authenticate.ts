@@ -31,7 +31,7 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
 export const createToken = (UID: string, tokenVersion: number, role: TUserRole) => {
     const access_token = jwt.sign({ UID, tokenVersion, role }, process.env.ACCESS_TOKEN_SECRET!, {
         algorithm: "HS256",
-        expiresIn: "5m",
+        expiresIn: "15m",
     });
     return access_token;
 };

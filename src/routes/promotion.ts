@@ -5,8 +5,11 @@ import { authorization } from "../middleware/authorization";
 import { HelperController } from "../helpers/Default";
 import { ILottoMySQL } from "../models/Lotto";
 import { v4 } from 'uuid';
-import { connection } from "../utils/database";
 import { IPromotionMySQL } from '../models/Promotion';
+import { createPool } from 'mysql2';
+import { config } from "dotenv";
+import { connections } from '../utils/database';
+config()
 
 const Helpers = new HelperController()
 
@@ -75,11 +78,22 @@ export class ApiPromotion {
                                     WHERE promotions.store_id = ?
                                     `
                         const fields = ["promotions", "promotions.user_create_id", "users.user_id", store, "promotions.rate_template_id", "rates_template.commission_id", store]
-
-                        connection.query(sql, fields, async (err, result, field) => {
-                            if (err) return res.status(202).json(err);
-                            return res.json(JSON.parse(JSON.stringify(result)))
+                        // const connection = createPool({
+                        //     host: process.env.VITE_OPS_DATABASE_HOST,
+                        //     user: process.env.VITE_OPS_DATABASE_USERNAME,
+                        //     password: process.env.VITE_OPS_DATABASE_PASSWORD,
+                        //     database: process.env.VITE_OPS_DATABASE_NAME,
+                        //     port: parseInt(process.env.VITE_OPS_DATABASE_PORT!),
+                        // })
+                        connections.getConnection((err, connection) => {
+                            connection.query(sql, fields, async (err, result, field) => {
+                                connection.release()
+                                if (err) return res.status(202).json(err);
+                                return res.json(JSON.parse(JSON.stringify(result)))
+                            });
+                            connection.release();
                         });
+
                         // const rates = await Helpers.select_database_left_join_where(["rates_template"], attr, join, where)
                         // if (!rates) return res.status(202).json({ message: "don't have rate" })
                         // return res.json(rates)
@@ -134,11 +148,22 @@ export class ApiPromotion {
                                     WHERE promotions.store_id = ? AND promotions.status = ?
                                     `
                         const fields = ["promotions", "promotions.user_create_id", "users.user_id", store, "promotions.rate_template_id", "rates_template.commission_id", store, "USED"]
+                        // const connection = createPool({
+                        //     host: process.env.VITE_OPS_DATABASE_HOST,
+                        //     user: process.env.VITE_OPS_DATABASE_USERNAME,
+                        //     password: process.env.VITE_OPS_DATABASE_PASSWORD,
+                        //     database: process.env.VITE_OPS_DATABASE_NAME,
+                        //     port: parseInt(process.env.VITE_OPS_DATABASE_PORT!),
+                        // })
+                        connections.getConnection((err, connection) => {
+                            connection.query(sql, fields, async (err, result, field) => {
+                                connection.release();
+                                if (err) return res.status(202).json(err);
+                                return res.json(JSON.parse(JSON.stringify(result)))
+                            });
+                            connection.release();
+                        })
 
-                        connection.query(sql, fields, async (err, result, field) => {
-                            if (err) return res.status(202).json(err);
-                            return res.json(JSON.parse(JSON.stringify(result)))
-                        });
                         // const rates = await Helpers.select_database_left_join_where(["rates_template"], attr, join, where)
                         // if (!rates) return res.status(202).json({ message: "don't have rate" })
                         // return res.json(rates)

@@ -12,7 +12,10 @@ import { ICommissionMySQL } from '../models/Commission';
 import { v4 } from 'uuid';
 import { ILottoMySQL } from '../models/Lotto';
 import moment from 'moment';
-import { connection } from '../utils/database';
+import { createPool } from 'mysql2';
+import { config } from "dotenv";
+import { connections } from '../utils/database';
+config()
 
 const Helpers = new HelperController()
 
@@ -265,124 +268,135 @@ export class ApiBill {
                             WHERE promotions.store_id = ? AND promotions.status = ?
                             `
                         const fields = ["promotions", "promotions.user_create_id", "users.user_id", data.store_id, "promotions.rate_template_id", "rates_template.commission_id", data.store_id, "USED"]
+                        // const connection = createPool({
+                        //     host: process.env.VITE_OPS_DATABASE_HOST,
+                        //     user: process.env.VITE_OPS_DATABASE_USERNAME,
+                        //     password: process.env.VITE_OPS_DATABASE_PASSWORD,
+                        //     database: process.env.VITE_OPS_DATABASE_NAME,
+                        //     port: parseInt(process.env.VITE_OPS_DATABASE_PORT!),
+                        // })
+                        connections.getConnection((err, connection) => {
+                            connection.query(sql, fields, async (err, result, field) => {
+                                connection.release();
+                                if (err) return res.status(202).json(err);
+                                const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+                                const [addbill] = await Helpers.select_database_where("rates", "*, CONVERT_TZ(NOW(),'+00:00','+07:00') AS now", [["lotto_id", "=", data.lotto_id]]) as IRateMySQL[]
+                                const attr_comminssion = "one_digits, two_digits, three_digits"
+                                const join = [["rates", "rates.commission_id", "=", "commissions.commission_id"]]
+                                const where = [["rates.lotto_id", "=", data.lotto_id]]
+                                const [commission] = await Helpers.select_database_left_join_where(["commissions"], attr_comminssion, join, where) as ICommissionMySQL[]
+                                const [lotto] = await Helpers.select_database_where("lottos", "open, date_type", [["lotto_id", "=", data.lotto_id]]) as ILottoMySQL[]
+                                let commissions: number = 0
+                                if (addbill.lotto_id == data.lotto_id) {
+                                    if (result && JSON.parse(JSON.stringify(result))[0]?.p_promotion.includes(days[new Date(data.times.toString()).getUTCDay()])) {
+                                        if (JSON.parse(JSON.stringify(result))[0].c_one_digits) {
+                                            if (data.one_digits) {
+                                                data.one_digits.map((p) => {
+                                                    if (JSON.parse(JSON.stringify(result))[0].c_one_digits) {
+                                                        commissions += parseFloat((parseFloat(p.split(":")[1]) * parseFloat(JSON.parse(JSON.parse(JSON.stringify(result))[0].c_one_digits as string).top!) / 100).toFixed(2))
+                                                        commissions += parseFloat((parseFloat(p.split(":")[2]) * parseFloat(JSON.parse(JSON.parse(JSON.stringify(result))[0].c_one_digits as string).bottom!) / 100).toFixed(2))
+                                                    }
+                                                })
+                                            }
 
-                        connection.query(sql, fields, async (err, result, field) => {
-                            if (err) return res.status(202).json(err);
-                            const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
-                            const [addbill] = await Helpers.select_database_where("rates", "*, CONVERT_TZ(NOW(),'+00:00','+07:00') AS now", [["lotto_id", "=", data.lotto_id]]) as IRateMySQL[]
-                            const attr_comminssion = "one_digits, two_digits, three_digits"
-                            const join = [["rates", "rates.commission_id", "=", "commissions.commission_id"]]
-                            const where = [["rates.lotto_id", "=", data.lotto_id]]
-                            const [commission] = await Helpers.select_database_left_join_where(["commissions"], attr_comminssion, join, where) as ICommissionMySQL[]
-                            const [lotto] = await Helpers.select_database_where("lottos", "open, date_type", [["lotto_id", "=", data.lotto_id]]) as ILottoMySQL[]
-                            let commissions: number = 0
-                            if (addbill.lotto_id == data.lotto_id) {
-                                if (result && JSON.parse(JSON.stringify(result))[0]?.p_promotion.includes(days[new Date(data.times.toString()).getUTCDay()])) {
-                                    if (JSON.parse(JSON.stringify(result))[0].c_one_digits) {
-                                        if (data.one_digits) {
-                                            data.one_digits.map((p) => {
-                                                if (JSON.parse(JSON.stringify(result))[0].c_one_digits) {
-                                                    commissions += parseFloat((parseFloat(p.split(":")[1]) * parseFloat(JSON.parse(JSON.parse(JSON.stringify(result))[0].c_one_digits as string).top!) / 100).toFixed(2))
-                                                    commissions += parseFloat((parseFloat(p.split(":")[2]) * parseFloat(JSON.parse(JSON.parse(JSON.stringify(result))[0].c_one_digits as string).bottom!) / 100).toFixed(2))
-                                                }
-                                            })
+                                            if (data.two_digits) {
+                                                data.two_digits.map((p) => {
+                                                    if (JSON.parse(JSON.stringify(result))[0].c_two_digits) {
+                                                        commissions += parseFloat((parseFloat(p.split(":")[1]) * parseFloat(JSON.parse(JSON.parse(JSON.stringify(result))[0].c_two_digits as string).top!) / 100).toFixed(2))
+                                                        commissions += parseFloat((parseFloat(p.split(":")[2]) * parseFloat(JSON.parse(JSON.parse(JSON.stringify(result))[0].c_two_digits as string).bottom!) / 100).toFixed(2))
+                                                    }
+                                                })
+                                            }
+
+                                            if (data.three_digits) {
+                                                data.three_digits.map((p) => {
+                                                    if (JSON.parse(JSON.stringify(result))[0].c_three_digits) {
+                                                        commissions += parseFloat((parseFloat(p.split(":")[1]) * parseFloat(JSON.parse(JSON.parse(JSON.stringify(result))[0].c_three_digits as string).top!) / 100).toFixed(2))
+                                                        commissions += parseFloat((parseFloat(p.split(":")[2]) * parseFloat(JSON.parse(JSON.parse(JSON.stringify(result))[0].c_three_digits as string).toad!) / 100).toFixed(2))
+                                                    }
+                                                })
+                                            }
                                         }
+                                    } else {
+                                        if (commission.one_digits) {
+                                            if (data.one_digits) {
+                                                data.one_digits.map((p) => {
+                                                    if (commission.one_digits) {
+                                                        commissions += parseFloat((parseFloat(p.split(":")[1]) * parseFloat(JSON.parse(commission.one_digits as string).top!) / 100).toFixed(2))
+                                                        commissions += parseFloat((parseFloat(p.split(":")[2]) * parseFloat(JSON.parse(commission.one_digits as string).bottom!) / 100).toFixed(2))
+                                                    }
+                                                })
+                                            }
 
-                                        if (data.two_digits) {
-                                            data.two_digits.map((p) => {
-                                                if (JSON.parse(JSON.stringify(result))[0].c_two_digits) {
-                                                    commissions += parseFloat((parseFloat(p.split(":")[1]) * parseFloat(JSON.parse(JSON.parse(JSON.stringify(result))[0].c_two_digits as string).top!) / 100).toFixed(2))
-                                                    commissions += parseFloat((parseFloat(p.split(":")[2]) * parseFloat(JSON.parse(JSON.parse(JSON.stringify(result))[0].c_two_digits as string).bottom!) / 100).toFixed(2))
-                                                }
-                                            })
-                                        }
+                                            if (data.two_digits) {
+                                                data.two_digits.map((p) => {
+                                                    if (commission.two_digits) {
+                                                        commissions += parseFloat((parseFloat(p.split(":")[1]) * parseFloat(JSON.parse(commission.two_digits as string).top!) / 100).toFixed(2))
+                                                        commissions += parseFloat((parseFloat(p.split(":")[2]) * parseFloat(JSON.parse(commission.two_digits as string).bottom!) / 100).toFixed(2))
+                                                    }
+                                                })
+                                            }
 
-                                        if (data.three_digits) {
-                                            data.three_digits.map((p) => {
-                                                if (JSON.parse(JSON.stringify(result))[0].c_three_digits) {
-                                                    commissions += parseFloat((parseFloat(p.split(":")[1]) * parseFloat(JSON.parse(JSON.parse(JSON.stringify(result))[0].c_three_digits as string).top!) / 100).toFixed(2))
-                                                    commissions += parseFloat((parseFloat(p.split(":")[2]) * parseFloat(JSON.parse(JSON.parse(JSON.stringify(result))[0].c_three_digits as string).toad!) / 100).toFixed(2))
-                                                }
-                                            })
+                                            if (data.three_digits) {
+                                                data.three_digits.map((p) => {
+                                                    if (commission.three_digits) {
+                                                        commissions += parseFloat((parseFloat(p.split(":")[1]) * parseFloat(JSON.parse(commission.three_digits as string).top!) / 100).toFixed(2))
+                                                        commissions += parseFloat((parseFloat(p.split(":")[2]) * parseFloat(JSON.parse(commission.three_digits as string).toad!) / 100).toFixed(2))
+                                                    }
+                                                })
+                                            }
                                         }
                                     }
+
+
                                 } else {
-                                    if (commission.one_digits) {
-                                        if (data.one_digits) {
-                                            data.one_digits.map((p) => {
-                                                if (commission.one_digits) {
-                                                    commissions += parseFloat((parseFloat(p.split(":")[1]) * parseFloat(JSON.parse(commission.one_digits as string).top!) / 100).toFixed(2))
-                                                    commissions += parseFloat((parseFloat(p.split(":")[2]) * parseFloat(JSON.parse(commission.one_digits as string).bottom!) / 100).toFixed(2))
-                                                }
-                                            })
-                                        }
-
-                                        if (data.two_digits) {
-                                            data.two_digits.map((p) => {
-                                                if (commission.two_digits) {
-                                                    commissions += parseFloat((parseFloat(p.split(":")[1]) * parseFloat(JSON.parse(commission.two_digits as string).top!) / 100).toFixed(2))
-                                                    commissions += parseFloat((parseFloat(p.split(":")[2]) * parseFloat(JSON.parse(commission.two_digits as string).bottom!) / 100).toFixed(2))
-                                                }
-                                            })
-                                        }
-
-                                        if (data.three_digits) {
-                                            data.three_digits.map((p) => {
-                                                if (commission.three_digits) {
-                                                    commissions += parseFloat((parseFloat(p.split(":")[1]) * parseFloat(JSON.parse(commission.three_digits as string).top!) / 100).toFixed(2))
-                                                    commissions += parseFloat((parseFloat(p.split(":")[2]) * parseFloat(JSON.parse(commission.three_digits as string).toad!) / 100).toFixed(2))
-                                                }
-                                            })
-                                        }
-                                    }
+                                    return res.status(202).json({ message: "don't have rate in store" })
                                 }
 
+                                let date = moment(new Date(addbill.now).toUTCString()).utc()
 
-                            } else {
-                                return res.status(202).json({ message: "don't have rate in store" })
-                            }
-
-                            let date = moment(new Date(addbill.now).toUTCString()).utc()
-
-                            let day = date.format("DD")
-                            let month = date.format("MM")
-                            let hour = date.format("HH")
-                            let minute = date.format("mm")
-                            if (lotto.date_type == "THAI") {
-                                date = moment(new Date(data.times).toUTCString()).utc()
-                                day = date.format("DD")
-                                month = date.format("MM")
-                            } else {
-                                if (getTomorrow(lotto.open, `${hour}:${minute}`)) {
-                                    date.subtract(1, 'days')
+                                let day = date.format("DD")
+                                let month = date.format("MM")
+                                let hour = date.format("HH")
+                                let minute = date.format("mm")
+                                if (lotto.date_type == "THAI") {
+                                    date = moment(new Date(data.times).toUTCString()).utc()
                                     day = date.format("DD")
                                     month = date.format("MM")
+                                } else {
+                                    if (getTomorrow(lotto.open, `${hour}:${minute}`)) {
+                                        date.subtract(1, 'days')
+                                        day = date.format("DD")
+                                        month = date.format("MM")
+                                    }
                                 }
-                            }
 
-                            const dateTime = new Date(`${date.format("YYYY")}-${month}-${day} 00:00:00`)
-                            const price = this.calculatePrice(data.one_digits!, data.two_digits!, data.three_digits!)
+                                const dateTime = new Date(`${date.format("YYYY")}-${month}-${day} 00:00:00`)
+                                const price = this.calculatePrice(data.one_digits!, data.two_digits!, data.three_digits!)
 
-                            if (authorize.credit < (price - commissions)) return res.status(202).json({ message: "no credit" })
+                                if (authorize.credit < (price - commissions)) return res.status(202).json({ message: "no credit" })
 
-                            const attr = ["bill_id", "store_id", "lotto_id", "rate_id", "times", "one_digits", "two_digits", "three_digits", "note", "status", "price", "rebate", "user_create_id"]
-                            const value = [v4(), addbill.store_id!, data.lotto_id, addbill.rate_template_id!, dateTime, JSON.stringify(data.one_digits), JSON.stringify(data.two_digits), JSON.stringify(data.three_digits), data.note, "WAIT", `${price}`, `${commissions.toFixed(2)}`, authorize.user_id!]
-                            await Helpers.insert_database("bills", attr, value)
-                                .then(async () => {
-                                    const attr = [["credit", "=", authorize.credit - (price - commissions)]]
-                                    const where = [["user_id", "=", authorize.id]]
-                                    await Helpers.update_database_where("users", attr, where)
-                                        .then(() => {
-                                            res.send({ statusCode: res.statusCode, message: "OK" })
-                                        })
-                                        .catch(() => {
-                                            return res.status(202).json({ message: "update credit unsuccessfully" })
-                                        })
-                                })
-                                .catch(() => {
-                                    return res.status(202).json({ message: "add bill unsuccessfully" })
-                                })
+                                const attr = ["bill_id", "store_id", "lotto_id", "rate_id", "times", "one_digits", "two_digits", "three_digits", "note", "status", "price", "rebate", "user_create_id"]
+                                const value = [v4(), addbill.store_id!, data.lotto_id, addbill.rate_template_id!, dateTime, JSON.stringify(data.one_digits), JSON.stringify(data.two_digits), JSON.stringify(data.three_digits), data.note, "WAIT", `${price}`, `${commissions.toFixed(2)}`, authorize.user_id!]
+                                await Helpers.insert_database("bills", attr, value)
+                                    .then(async () => {
+                                        const attr = [["credit", "=", authorize.credit - (price - commissions)]]
+                                        const where = [["user_id", "=", authorize.id]]
+                                        await Helpers.update_database_where("users", attr, where)
+                                            .then(() => {
+                                                res.send({ statusCode: res.statusCode, message: "OK" })
+                                            })
+                                            .catch(() => {
+                                                return res.status(202).json({ message: "update credit unsuccessfully" })
+                                            })
+                                    })
+                                    .catch(() => {
+                                        return res.status(202).json({ message: "add bill unsuccessfully" })
+                                    })
+                            });
+                            connection.release();
                         });
+
 
                     } else {
                         return res.sendStatus(authorize)

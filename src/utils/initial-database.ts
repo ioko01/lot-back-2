@@ -1,10 +1,10 @@
 import { PoolConnection } from "mysql2/typings/mysql/lib/PoolConnection";
-import { connection } from "./database";
+import { connections } from "./database";
 import async from "async";
 import { Response } from "express";
 
 export const create_initial_database = (res: Response) => {
-    connection.getConnection((err: NodeJS.ErrnoException | null, conn: PoolConnection) => {
+    connections.getConnection((err: NodeJS.ErrnoException | null, conn: PoolConnection) => {
         if (err) throw err
         // const q0 = `SET GLOBAL time_zone = '+7:00';`
         const q1 = `

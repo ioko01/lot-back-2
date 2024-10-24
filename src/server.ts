@@ -15,14 +15,14 @@ import { ApiDigitSemi } from './routes/digitSemi';
 import { ApiDigitClose } from './routes/digitClose';
 import { ApiCheckReward } from './routes/checkReward';
 import http from "http";
-// import { Server as SocketIOServer, Socket } from "socket.io";
-// import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from './utils/socket-io';
-// import { digitCloseHandler } from './socket/digitCloseHandler';
-// import { userHandler } from './socket/userHandler';
-// import { storeHandler } from './socket/storeHandler';
+import { Server as SocketIOServer, Socket } from "socket.io";
+import { ClientToServerEvents, InterServerEvents, ServerToClientEvents, SocketData } from './utils/socket-io';
+import { digitCloseHandler } from './socket/digitCloseHandler';
+import { userHandler } from './socket/userHandler';
+import { storeHandler } from './socket/storeHandler';
 import upload from 'express-fileupload'
 import { ApiFile } from './routes/file';
-// import { creditHandler } from './socket/creditHandler';
+import { creditHandler } from './socket/creditHandler';
 import { ApiRateTemplate } from './routes/rate_template';
 import { ApiPromotion } from './routes/promotion';
 import jwt from 'jsonwebtoken';
@@ -34,7 +34,7 @@ export const APP: Application = express()
 export const router = express.Router()
 
 const server = http.createServer(APP)
-// export const io = new SocketIOServer(server, { cors: { origin: true } })
+export const io = new SocketIOServer(server, { cors: { origin: true } })
 
 // APP.set("trust proxy", 1)
 APP.use(cookieParser())
@@ -56,17 +56,17 @@ const Promotion = new ApiPromotion()
 // const API = new ApiGetCheckReward()
 
 
-// io.on("connection", (socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>) => {
+io.on("connection", (socket: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>) => {
 
-//     digitCloseHandler(socket)
-//     userHandler(socket)
-//     storeHandler(socket)
-//     creditHandler(socket)
+    digitCloseHandler(socket)
+    userHandler(socket)
+    storeHandler(socket)
+    creditHandler(socket)
 
-//     socket.on("disconnect", () => {
-//         // console.log("user is disconnected");
-//     })
-// })
+    socket.on("disconnect", () => {
+        // console.log("user is disconnected");
+    })
+})
 
 // API.apiGetResultAll('/result/api', authenticate, ["ADMIN", "AGENT", "MANAGER", "MANAGE_REWARD", "MEMBER"])
 
@@ -128,12 +128,12 @@ RateTemplate.addRateTemplate('/add/rate_template', authenticate, ["ADMIN", "AGEN
 RateTemplate.updateRate('/update/rate_template', authenticate, ["ADMIN", "AGENT"])
 RateTemplate.deleteRate('/delete/rate_template', authenticate, ["ADMIN", "AGENT"])
 
-DigitSemi.getDigitSemiIdAndStoreId('/get/digitsemi/:id/:store/:start/:end', authenticate, ["ADMIN", "AGENT", "MANAGER", "MEMBER"])
-DigitSemi.getDigitSemiMe('/get/digitsemi', authenticate, ["ADMIN", "AGENT", "MANAGER", "MEMBER"])// ดูเลขจ่ายครึ่งของร้านตัวเอง
-DigitSemi.getDigitSemiAll('/get/digitsemi', authenticate, ["ADMIN"])// ดูเลขจ่ายครึ่งของทุกร้าน
-DigitSemi.addDigitSemi('/add/digitsemi', authenticate, ["ADMIN", "AGENT"])
-DigitSemi.updateDigitSemi('/add/digitsemi', authenticate, ["ADMIN", "AGENT"])
-DigitSemi.deleteDigitSemi('/add/digitsemi', authenticate, ["ADMIN", "AGENT"])
+// DigitSemi.getDigitSemiIdAndStoreId('/get/digitsemi/:id/:store/:start/:end', authenticate, ["ADMIN", "AGENT", "MANAGER", "MEMBER"])
+// DigitSemi.getDigitSemiMe('/get/digitsemi', authenticate, ["ADMIN", "AGENT", "MANAGER", "MEMBER"])// ดูเลขจ่ายครึ่งของร้านตัวเอง
+// DigitSemi.getDigitSemiAll('/get/digitsemi', authenticate, ["ADMIN"])// ดูเลขจ่ายครึ่งของทุกร้าน
+// DigitSemi.addDigitSemi('/add/digitsemi', authenticate, ["ADMIN", "AGENT"])
+// DigitSemi.updateDigitSemi('/add/digitsemi', authenticate, ["ADMIN", "AGENT"])
+// DigitSemi.deleteDigitSemi('/add/digitsemi', authenticate, ["ADMIN", "AGENT"])
 
 DigitClose.getDigitCloseIdAndStoreId('/get/digitclose/:id/:store/:start/:end', authenticate, ["ADMIN", "AGENT", "MANAGER", "MEMBER"])
 DigitClose.getDigitCloseMe('/get/digitclose/me', authenticate, ["ADMIN", "AGENT", "MANAGER", "MEMBER"])

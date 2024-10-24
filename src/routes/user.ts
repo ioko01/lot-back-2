@@ -4,13 +4,13 @@ import { validatePassword, validateUsername } from '../utils/validate';
 import { IUserMySQL, TUserRole, TUserRoleEnum, TUserStatusEnum } from '../models/User';
 import bcrypt from "bcrypt";
 import { createToken, refreshToken } from '../middleware/authenticate';
-import { config } from "dotenv";
 import { HelperController } from '../helpers/Default';
 import { authorization } from '../middleware/authorization';
 import { v4 } from "uuid";
 import { IStoreMySQL } from '../models/Store';
-import { connection } from '../utils/database';
-
+import { createPool } from 'mysql2';
+import { config } from "dotenv";
+import { connections } from '../utils/database';
 config()
 
 const Helpers = new HelperController()
@@ -209,11 +209,22 @@ export class ApiUser {
                                         LEFT JOIN stores ON stores.store_id = users.store_id
                                         WHERE users.store_id = ?
                                         `;
-
-                        connection.query(sql, ["users", store], async (err, result, field) => {
-                            if (err) return res.status(202).json(err);
-                            return res.json(JSON.parse(JSON.stringify(result)))
+                        // const connection = createPool({
+                        //     host: process.env.VITE_OPS_DATABASE_HOST,
+                        //     user: process.env.VITE_OPS_DATABASE_USERNAME,
+                        //     password: process.env.VITE_OPS_DATABASE_PASSWORD,
+                        //     database: process.env.VITE_OPS_DATABASE_NAME,
+                        //     port: parseInt(process.env.VITE_OPS_DATABASE_PORT!),
+                        // })
+                        connections.getConnection((err, connection) => {
+                            connection.query(sql, ["users", store], async (err, result, field) => {
+                                connection.release();
+                                if (err) return res.status(202).json(err);
+                                return res.json(JSON.parse(JSON.stringify(result)))
+                            });
+                            connection.release();
                         });
+
                     } else {
                         return res.sendStatus(authorize)
                     }
@@ -783,26 +794,54 @@ export class ApiUser {
             try {
 
                 const data: { username: string, u_password: string } = req.body
-                const tb = "users"
-                const attr = "user_id, fullname, role, credit, status, tokenVersion, created_at, updated_at, u_password, user_create_id"
-                const where = [["username", "=", data.username]]
-                const [user] = await Helpers.select_database_where(tb, attr, where) as IUserMySQL[]
-                if (!user) return res.status(202).send({ message: "no account" })
+                const sql = `
+                            SELECT
+                                user_id, 
+                                fullname, 
+                                role, 
+                                credit, 
+                                status, 
+                                tokenVersion, 
+                                created_at, 
+                                updated_at, 
+                                u_password, 
+                                user_create_id
+                            FROM ??
+                            WHERE username = ?
+                            `;
+                // const connection = createPool({
+                //     host: process.env.VITE_OPS_DATABASE_HOST,
+                //     user: process.env.VITE_OPS_DATABASE_USERNAME,
+                //     password: process.env.VITE_OPS_DATABASE_PASSWORD,
+                //     database: process.env.VITE_OPS_DATABASE_NAME,
+                //     port: parseInt(process.env.VITE_OPS_DATABASE_PORT!),
+                // })
+                connections.getConnection((err, connection) => {
+                    connection.query(sql, ["users", data.username], async (err, result, field) => {
+                        connection.release();
 
-                const isPasswordValid = await bcrypt.compare(
-                    data.u_password!,
-                    user.u_password!
-                )
-                if (!isPasswordValid) return res.status(202).send({ message: "invalid password" })
+                        if (err) return res.status(202).json(err);
+                        const [user] = result as IUserMySQL[]
+                        if (!user) return res.status(202).send({ message: "no account" })
 
-                const access_token = createToken(user.user_id!, user.tokenVersion!, user.role)
-                const refresh_token = refreshToken(user.user_id!, user.tokenVersion!, user.role)
-                if (!user.tokenVersion) return res.sendStatus(403)
-                user.refresh_token = refresh_token
-                // const VITE_OPS_COOKIE_NAME = process.env.VITE_OPS_COOKIE_NAME!
-                return res
-                    .status(200)
-                    .send({ access_token, refresh_token })
+                        const isPasswordValid = await bcrypt.compare(
+                            data.u_password!,
+                            user.u_password!
+                        )
+                        if (!isPasswordValid) return res.status(202).send({ message: "invalid password" })
+
+                        const access_token = createToken(user.user_id!, user.tokenVersion!, user.role)
+                        const refresh_token = refreshToken(user.user_id!, user.tokenVersion!, user.role)
+                        if (!user.tokenVersion) return res.sendStatus(403)
+                        user.refresh_token = refresh_token
+                        // const VITE_OPS_COOKIE_NAME = process.env.VITE_OPS_COOKIE_NAME!
+                        return res
+                            .status(200)
+                            .send({ access_token, refresh_token })
+                    });
+                    connection.release();
+                });
+
             } catch (err: any) {
                 res.send(err)
             }
