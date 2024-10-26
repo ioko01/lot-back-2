@@ -364,7 +364,7 @@ export class ApiBill {
                                     day = date.format("DD")
                                     month = date.format("MM")
                                 } else {
-                                    if (getTomorrow(lotto.open, `${hour}:${minute}`)) {
+                                    if (getTomorrow(lotto.l_open, `${hour}:${minute}`)) {
                                         date.subtract(1, 'days')
                                         day = date.format("DD")
                                         month = date.format("MM")
