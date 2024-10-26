@@ -39,8 +39,8 @@ export class ApiLotto {
                             lottos.lotto_id AS l_id, 
                             lottos.name AS l_name, 
                             img_flag, 
-                            open, 
-                            close, 
+                            open AS l_open, 
+                            close AS l_close, 
                             report, 
                             lottos.status AS l_status , 
                             date_type, 
@@ -124,8 +124,8 @@ export class ApiLotto {
                                         lottos.lotto_id as l_id, 
                                         lottos.name AS l_name, 
                                         lottos.img_flag AS l_img_flag, 
-                                        lottos.open AS open, 
-                                        lottos.close AS close, 
+                                        lottos.open AS l_open, 
+                                        lottos.close AS l_close, 
                                         lottos.report AS report, 
                                         lottos.status AS status, 
                                         lottos.promotion As promotion, 
@@ -223,8 +223,8 @@ export class ApiLotto {
                             name: data.name,
                             store_id: data.store_id,
                             img_flag: data.img_flag,
-                            open: data.open,
-                            close: data.close,
+                            l_open: data.l_open,
+                            l_close: data.l_close,
                             report: data.report,
                             status: data.status,
                             user_create_id: authorize.user_id,
@@ -236,8 +236,8 @@ export class ApiLotto {
                         if (data.date) lotto.date_open = data.date
                         if (data.thai_open_date) lotto.thai_open_date = data.thai_open_date
                         const lotto_id = v4()
-                        const attr = ["lotto_id", "store_id", "name", "img_flag", "open", "close", "report", "status", "date_type", "date_open", "thai_open_date", "api", "groups AS l_groups", "user_create_id"]
-                        const values = [lotto_id, data.store_id, data.name, data.img_flag, data.open, data.close, data.report, data.status.toString(), data.date_type, JSON.stringify(data.date_open!), data.thai_open_date ?? "", data.api ?? "", data.l_groups ?? "", authorize.user_id!]
+                        const attr = ["lotto_id", "store_id", "name", "img_flag", "open AS l_open", "close AS l_close", "report", "status", "date_type", "date_open", "thai_open_date", "api", "groups AS l_groups", "user_create_id"]
+                        const values = [lotto_id, data.store_id, data.name, data.img_flag, data.l_open, data.l_close, data.report, data.status.toString(), data.date_type, JSON.stringify(data.date_open!), data.thai_open_date ?? "", data.api ?? "", data.l_groups ?? "", authorize.user_id!]
                         await Helpers.insert_database("lottos", attr, values)
                             .then(async () => {
                                 const attr = ["rate_id", "lotto_id", "store_id", "commission_id", "rate_template_id", "user_create_id"]

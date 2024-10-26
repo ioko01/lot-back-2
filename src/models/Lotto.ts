@@ -47,8 +47,8 @@ export interface ILottoMySQL extends RowDataPacket {
     store_id: string
     name: string //ชื่อหวย
     img_flag: string //สัญลักษณ์หวย(ธง)
-    open: string //เวลาเปิดรับ
-    close: string //เวลาปิดรับ
+    l_open: string //เวลาเปิดรับ
+    l_close: string //เวลาปิดรับ
     report: string //เวลาผลออก
     status: TLottoStatus //สถานะหวย
     date_type: TLottoDate //ชนิดวันหวยออก

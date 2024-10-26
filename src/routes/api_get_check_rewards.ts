@@ -306,7 +306,7 @@ export class ApiGetCheckReward {
                             let minute = date.format("mm")
                             let second = date.format("ss")
 
-                            if (new Date(`${year}-${month}-${day_not_sub}T${lot.close}:00.000Z`) < new Date(`${year}-${month}-${day_not_sub}T${lot.open}:00.000Z`)) {
+                            if (new Date(`${year}-${month}-${day_not_sub}T${lot.l_close}:00.000Z`) < new Date(`${year}-${month}-${day_not_sub}T${lot.l_open}:00.000Z`)) {
                                 day = date.subtract(1, 'days').get('date').toString()
                             }
 
