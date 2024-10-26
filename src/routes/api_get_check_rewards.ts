@@ -317,7 +317,7 @@ export class ApiGetCheckReward {
                             const check_times_end = new Date(`${year}-${month}-${day} 23:59:59`)
                             const report_add_minute = moment(new Date(`${year}-${month}-${day}T${lot.report}:00.000Z`))
 
-                            if (lot.groups == "หวยหุ้น") {
+                            if (lot.l_groupss == "หวยหุ้น") {
                                 minute = report_add_minute.add(5, 'minutes').get('minutes').toString()
                             } else {
                                 // minute = report_add_minute.add(2, 'minutes').get('minutes').toString()

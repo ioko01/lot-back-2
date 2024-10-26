@@ -47,7 +47,7 @@ export class ApiLotto {
                             date_open, 
                             thai_open_date, 
                             api, 
-                            groups, 
+                            groups AS l_groups, 
                             lottos.promotion AS promotion, 
                             thai_this_times, 
                             thai_next_times, 
@@ -236,8 +236,8 @@ export class ApiLotto {
                         if (data.date) lotto.date_open = data.date
                         if (data.thai_open_date) lotto.thai_open_date = data.thai_open_date
                         const lotto_id = v4()
-                        const attr = ["lotto_id", "store_id", "name", "img_flag", "open", "close", "report", "status", "date_type", "date_open", "thai_open_date", "api", "groups", "user_create_id"]
-                        const values = [lotto_id, data.store_id, data.name, data.img_flag, data.open, data.close, data.report, data.status.toString(), data.date_type, JSON.stringify(data.date_open!), data.thai_open_date ?? "", data.api ?? "", data.groups ?? "", authorize.user_id!]
+                        const attr = ["lotto_id", "store_id", "name", "img_flag", "open", "close", "report", "status", "date_type", "date_open", "thai_open_date", "api", "groups AS l_groups", "user_create_id"]
+                        const values = [lotto_id, data.store_id, data.name, data.img_flag, data.open, data.close, data.report, data.status.toString(), data.date_type, JSON.stringify(data.date_open!), data.thai_open_date ?? "", data.api ?? "", data.l_groups ?? "", authorize.user_id!]
                         await Helpers.insert_database("lottos", attr, values)
                             .then(async () => {
                                 const attr = ["rate_id", "lotto_id", "store_id", "commission_id", "rate_template_id", "user_create_id"]

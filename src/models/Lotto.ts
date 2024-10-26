@@ -25,7 +25,7 @@ export interface ILotto extends IInitialState {
     date?: string[] // วันเปิดรับ
     thai_open_date?: string // วันหวยออกของไทย
     api?: string
-    group?: string
+    l_group?: string
 }
 
 export interface ILottoWithId extends IInitialStateWithId {
@@ -39,7 +39,7 @@ export interface ILottoWithId extends IInitialStateWithId {
     date?: string[] // วันเปิดรับ
     thai_open_date?: string // วันหวยออกของไทย
     api?: string
-    group?: string
+    l_group?: string
 }
 
 export interface ILottoMySQL extends RowDataPacket {
@@ -55,6 +55,6 @@ export interface ILottoMySQL extends RowDataPacket {
     date_open?: string[] // วันเปิดรับ
     thai_open_date?: string // วันหวยออกของไทย
     api?: string
-    groups?: string
+    l_groups?: string
     user_create_id?: string
 }
