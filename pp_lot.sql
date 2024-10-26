@@ -38,7 +38,7 @@ CREATE TABLE `bills` (
   `two_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'เลข 2 ตัว ตัวเลข/ราคาบน/ราคาล่าง [01:5:5, 10:5:5, 02:10:5, 20:10:5]' CHECK (json_valid(`two_digits`)),
   `three_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'เลข 3 ตัว ตัวเลข/ราคาบน/ราคาจ่ายโต๊ด [011:5:5, 101:5:5, 025:5:5, 205:5:5]' CHECK (json_valid(`three_digits`)),
   `note` varchar(255) DEFAULT NULL COMMENT 'หมายเหตุ',
-  `status` enum('WAIT','CANCEL','REWARD') DEFAULT 'WAIT' COMMENT 'สถานะ',
+  `b_status` enum('WAIT','CANCEL','REWARD') DEFAULT 'WAIT' COMMENT 'สถานะ',
   `price` varchar(255) NOT NULL DEFAULT '0' COMMENT 'ราคาบิล',
   `win` varchar(255) NOT NULL DEFAULT '0' COMMENT 'ถูกรางวัล',
   `rebate` varchar(255) NOT NULL DEFAULT '0' COMMENT 'ส่วนลด',
@@ -183,19 +183,19 @@ CREATE TABLE `lottos` (
   `store_id` varchar(255) NOT NULL COMMENT 'ไอดีร้านค้า',
   `color_background` varchar(255) NOT NULL DEFAULT '#DCFCE7',
   `color_border` varchar(255) NOT NULL DEFAULT '#4ADE80',
-  `name` varchar(255) NOT NULL COMMENT 'ชื่อหวย',
+  `l_name` varchar(255) NOT NULL COMMENT 'ชื่อหวย',
   `img_flag` varchar(255) NOT NULL COMMENT 'สัญลักษณ์หวย(ธง)',
-  `open` varchar(20) NOT NULL COMMENT 'เวลาเปิดรับ',
-  `close` varchar(20) NOT NULL COMMENT 'เวลาปิดรับ',
+  `l_open` varchar(20) NOT NULL COMMENT 'เวลาเปิดรับ',
+  `l_close` varchar(20) NOT NULL COMMENT 'เวลาปิดรับ',
   `report` varchar(20) NOT NULL COMMENT 'เวลาผลออก',
-  `status` enum('OPEN','CLOSE') NOT NULL DEFAULT 'OPEN' COMMENT 'สถานะหวย',
+  `l_status` enum('OPEN','CLOSE') NOT NULL DEFAULT 'OPEN' COMMENT 'สถานะหวย',
   `date_type` enum('SELECT_DATE','THAI') NOT NULL DEFAULT 'SELECT_DATE' COMMENT 'ชนิดวันหวยออก',
   `date_open` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'วันเปิดรับ [''sunday'', ''monday'' ,...]' CHECK (json_valid(`date_open`)),
   `thai_open_date` varchar(255) DEFAULT NULL COMMENT 'วันหวยออกของไทย',
   `thai_this_times` datetime DEFAULT NULL COMMENT 'หวยไทยงวดนี้',
   `thai_next_times` datetime DEFAULT NULL COMMENT 'หวยไทยงวดถัดไป',
   `api` text DEFAULT NULL COMMENT 'ลิงก์ API',
-  `groups` varchar(255) DEFAULT NULL COMMENT 'กลุ่มหวย',
+  `l_groups` varchar(255) DEFAULT NULL COMMENT 'กลุ่มหวย',
   `promotion` enum('USED','NOT_USED') NOT NULL DEFAULT 'NOT_USED' COMMENT 'โปรโมชั่น',
   `user_create_id` varchar(255) DEFAULT NULL COMMENT 'ไอดีผู้สร้าง',
   `modify_commission` enum('YES','NO') NOT NULL DEFAULT 'NO' COMMENT 'ใส่ค่าคอมด้วยตนเอง',
@@ -207,7 +207,7 @@ CREATE TABLE `lottos` (
 -- Dumping data for table `lottos`
 --
 
-INSERT INTO `lottos` (`id`, `lotto_id`, `store_id`, `color_background`, `color_border`, `name`, `img_flag`, `open`, `close`, `report`, `status`, `date_type`, `date_open`, `thai_open_date`, `thai_this_times`, `thai_next_times`, `api`, `groups`, `promotion`, `user_create_id`, `modify_commission`, `created_at`, `updated_at`) VALUES
+INSERT INTO `lottos` (`id`, `lotto_id`, `store_id`, `color_background`, `color_border`, `l_name`, `img_flag`, `l_open`, `l_close`, `report`, `l_status`, `date_type`, `date_open`, `thai_open_date`, `thai_this_times`, `thai_next_times`, `api`, `l_groups`, `promotion`, `user_create_id`, `modify_commission`, `created_at`, `updated_at`) VALUES
 (2, '319e44b9-c403-441f-bde0-14dcc98bf65d', 'f4d11ff3-c2fc-44e3-9283-b3905ed9033a', '#DCFCE7', '#4ADE80', 'ลาวพัฒนา', 'หวยลาว.png', '06:00', '20:15', '20:25', 'CLOSE', 'SELECT_DATE', '[\"monday\",\"wednesday\",\"friday\"]', '', NULL, NULL, '', 'หวยฮานอย', 'USED', 'e9853aa1-d89d-4df4-8683-713fc2f20de2', 'NO', '2024-03-18 12:33:58', '2024-03-18 12:33:58'),
 (3, 'e49e7dda-97a3-4cad-a9b5-e55397b17b7c', 'f4d11ff3-c2fc-44e3-9283-b3905ed9033a', '#e6ccff', '#430085', 'หวยลาวสามัคคี', 'หวยลาว สามัคคี.png', '06:00', '20:20', '20:30', 'CLOSE', 'SELECT_DATE', '[\"sunday\",\"monday\",\"tuesday\",\"wednesday\",\"thursday\",\"friday\",\"saturday\"]', '', NULL, NULL, '', 'หวยรายวัน', 'USED', 'e9853aa1-d89d-4df4-8683-713fc2f20de2', 'NO', '2024-03-18 13:03:28', '2024-03-18 13:03:28'),
 (5, '5af0a59b-3ddc-4b0e-a5fb-fe8be92fd452', 'f4d11ff3-c2fc-44e3-9283-b3905ed9033a', '#DCFCE7', '#4ADE80', 'ลาวอาเซียน', 'ลาว อาเซียน.png', '06:00', '20:55', '21:00', 'OPEN', 'SELECT_DATE', '[\"sunday\",\"monday\",\"tuesday\",\"wednesday\",\"thursday\",\"friday\",\"saturday\"]', '', NULL, NULL, '', 'หวยรายวัน', 'USED', 'e9853aa1-d89d-4df4-8683-713fc2f20de2', 'NO', '2024-03-18 13:18:07', '2024-03-18 13:18:07'),
@@ -286,11 +286,11 @@ INSERT INTO `lottos` (`id`, `lotto_id`, `store_id`, `color_background`, `color_b
 CREATE TABLE `promotions` (
   `id` int(11) NOT NULL COMMENT 'เลขรัน',
   `promotion_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ไอดีโปรโมชั่น',
-  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ชื่อโปรโมชั่น',
+  `p_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ชื่อโปรโมชั่น',
   `store_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ไอดีร้านค้า',
   `rate_template_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ไอดีเทมเพลตเรทราคา',
   `date_promotion` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'วันที่จัดโปรโมชั่น' CHECK (json_valid(`date_promotion`)),
-  `status` enum('USED','NOT_USED') CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'NOT_USED' COMMENT 'สถานะการใช้งาน',
+  `p_status` enum('USED','NOT_USED') CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'NOT_USED' COMMENT 'สถานะการใช้งาน',
   `user_create_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ไอดีผู้สร้าง',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -300,7 +300,7 @@ CREATE TABLE `promotions` (
 -- Dumping data for table `promotions`
 --
 
-INSERT INTO `promotions` (`id`, `promotion_id`, `name`, `store_id`, `rate_template_id`, `date_promotion`, `status`, `user_create_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `promotions` (`id`, `promotion_id`, `p_name`, `store_id`, `rate_template_id`, `date_promotion`, `p_status`, `user_create_id`, `created_at`, `updated_at`) VALUES
 (1, 'afbd60c2-6b5e-4d91-9dba-f3d09592e410', 'โปรโมชั่น เสา-อา บาท 101', 'f4d11ff3-c2fc-44e3-9283-b3905ed9033a', '6875554e-0b5d-484a-84e3-12d07c0198ea', '[\"sunday\",\"saturday\"]', 'NOT_USED', '056aab1d-c5f5-4003-8b33-457c57e1deb9', '2024-05-26 18:58:46', '2024-05-26 18:58:46');
 
 -- --------------------------------------------------------
@@ -411,7 +411,7 @@ CREATE TABLE `rates_template` (
   `rate_template_id` varchar(255) NOT NULL COMMENT 'ไอดีเรทราคา',
   `commission_id` varchar(255) NOT NULL COMMENT 'ไอดีค่าคอมมิชชั่น',
   `store_id` varchar(255) NOT NULL COMMENT 'ไอดีร้าน',
-  `name` varchar(255) NOT NULL COMMENT 'ชื่อเทมเพลท',
+  `rt_name` varchar(255) NOT NULL COMMENT 'ชื่อเทมเพลท',
   `one_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'ราคาจ่ายเลขวิ่ง ราคาจ่ายบน/ราคาจ่ายล่าง ==> {top:3, bottom: 4}' CHECK (json_valid(`one_digits`)),
   `two_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'ราคาจ่ายเลข 2 ตัว ราคาจ่ายบน/ราคาจ่ายล่าง ==> {top:95, bottom:95}' CHECK (json_valid(`two_digits`)),
   `three_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'ราคาจ่ายเลข 3 ตัว  ราคาจ่ายบน/ราคาจ่ายโต๊ด ==> {top:800, toad:125}' CHECK (json_valid(`three_digits`)),
@@ -427,7 +427,7 @@ CREATE TABLE `rates_template` (
 -- Dumping data for table `rates_template`
 --
 
-INSERT INTO `rates_template` (`id`, `rate_template_id`, `commission_id`, `store_id`, `name`, `one_digits`, `two_digits`, `three_digits`, `bet_one_digits`, `bet_two_digits`, `bet_three_digits`, `user_create_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `rates_template` (`id`, `rate_template_id`, `commission_id`, `store_id`, `rt_name`, `one_digits`, `two_digits`, `three_digits`, `bet_one_digits`, `bet_two_digits`, `bet_three_digits`, `user_create_id`, `created_at`, `updated_at`) VALUES
 (2, '2f336048-6537-43dd-b8ab-1904f5e86751', 'e52aa99c-e169-4219-aef7-a0c5565724c8', 'f4d11ff3-c2fc-44e3-9283-b3905ed9033a', '100/800/125', '{\"top\":\"3\",\"bottom\":\"4\"}', '{\"top\":\"100\",\"bottom\":\"100\"}', '{\"top\":\"800\",\"toad\":\"125\"}', '{\"top\":\"1:20000:20000\",\"bottom\":\"1:20000:20000\"}', '{\"top\":\"1:20000:20000\",\"bottom\":\"1:20000:20000\"}', '{\"top\":\"1:20000:20000\",\"toad\":\"1:20000:20000\"}', '056aab1d-c5f5-4003-8b33-457c57e1deb9', '2024-03-18 12:31:04', '2024-03-18 12:31:04'),
 (3, '7d6feb7a-4ff5-44d9-a3f3-c063b93d9193', '091e0fe1-6068-49a4-a083-5d3c35ed7ce3', 'f4d11ff3-c2fc-44e3-9283-b3905ed9033a', '92/750/125', '{\"top\":\"3\",\"bottom\":\"4\"}', '{\"top\":\"92\",\"bottom\":\"92\"}', '{\"top\":\"750\",\"toad\":\"125\"}', '{\"top\":\"1:20000:30000\",\"bottom\":\"1:20000:30000\"}', '{\"top\":\"1:20000:30000\",\"bottom\":\"1:20000:30000\"}', '{\"top\":\"1:20000:30000\",\"toad\":\"1:20000:30000\"}', '056aab1d-c5f5-4003-8b33-457c57e1deb9', '2024-04-01 03:13:00', '2024-04-01 03:13:00'),
 (4, 'b542c13d-58f8-4fa3-b7b5-34a2db448124', '1ce48c0b-703e-456e-8612-ee14b46de0ff', 'cd33d712-b2c3-4dc8-93fc-41226995d00f', '70/500/100', '{\"top\":\"3\",\"bottom\":\"4\"}', '{\"top\":\"70\",\"bottom\":\"70\"}', '{\"top\":\"500\",\"toad\":\"100\"}', '{\"top\":\"1:20000:20000\",\"bottom\":\"1:20000:20000\"}', '{\"top\":\"1:20000:20000\",\"bottom\":\"1:20000:20000\"}', '{\"top\":\"1:20000:20000\",\"toad\":\"1:20000:20000\"}', '056aab1d-c5f5-4003-8b33-457c57e1deb9', '2024-05-26 18:51:52', '2024-05-26 18:51:52'),
@@ -442,7 +442,7 @@ INSERT INTO `rates_template` (`id`, `rate_template_id`, `commission_id`, `store_
 CREATE TABLE `stores` (
   `id` int(11) NOT NULL COMMENT 'เลขรัน',
   `store_id` varchar(255) NOT NULL COMMENT 'ไอดีร้านค้า',
-  `name` varchar(255) NOT NULL COMMENT 'ชื่อร้านค้า',
+  `s_name` varchar(255) NOT NULL COMMENT 'ชื่อร้านค้า',
   `logo` varchar(255) NOT NULL COMMENT 'โลโก้',
   `user_create_id` varchar(255) DEFAULT NULL COMMENT 'ไอดีผู้สร้าง',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -453,7 +453,7 @@ CREATE TABLE `stores` (
 -- Dumping data for table `stores`
 --
 
-INSERT INTO `stores` (`id`, `store_id`, `name`, `logo`, `user_create_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `stores` (`id`, `store_id`, `s_name`, `logo`, `user_create_id`, `created_at`, `updated_at`) VALUES
 (1, 'f4d11ff3-c2fc-44e3-9283-b3905ed9033a', 'เจ้าขุนทอง', 'logo.png', '056aab1d-c5f5-4003-8b33-457c57e1deb9', '2024-03-18 12:10:19', '2024-03-18 12:10:19'),
 (3, 'cd33d712-b2c3-4dc8-93fc-41226995d00f', 'เจ้าขุนทอง V2 ไทย', 'logo.png', '056aab1d-c5f5-4003-8b33-457c57e1deb9', '2024-05-26 18:47:52', '2024-05-26 18:47:52');
 
@@ -470,8 +470,8 @@ CREATE TABLE `users` (
   `username` varchar(50) NOT NULL COMMENT 'ไอดีผู้ใช้งานสำหรับเข้าสู่ระบบ',
   `u_password` varchar(255) NOT NULL COMMENT 'รหัสผ่าน',
   `fullname` varchar(255) NOT NULL COMMENT 'ชื่อ - สกุล',
-  `role` enum('ADMIN','AGENT','MANAGER','MEMBER','MANAGE_REWARD') NOT NULL DEFAULT 'MEMBER' COMMENT 'ตำแหน่ง',
-  `status` enum('REGULAR','CLOSED','BANNED') NOT NULL DEFAULT 'REGULAR' COMMENT 'สถานะ',
+  `u_role` enum('ADMIN','AGENT','MANAGER','MEMBER','MANAGE_REWARD') NOT NULL DEFAULT 'MEMBER' COMMENT 'ตำแหน่ง',
+  `u_status` enum('REGULAR','CLOSED','BANNED') NOT NULL DEFAULT 'REGULAR' COMMENT 'สถานะ',
   `credit` int(11) DEFAULT 0 COMMENT 'เครดิต',
   `tokenVersion` int(11) DEFAULT 1 COMMENT 'เวอร์ชั่นโทเคน',
   `user_create_id` varchar(255) DEFAULT NULL COMMENT 'ไอดีผู้สร้าง',
@@ -483,7 +483,7 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `user_id`, `store_id`, `username`, `u_password`, `fullname`, `role`, `status`, `credit`, `tokenVersion`, `user_create_id`, `created_at`, `updated_at`) VALUES
+INSERT INTO `users` (`id`, `user_id`, `store_id`, `username`, `u_password`, `fullname`, `u_role`, `u_status`, `credit`, `tokenVersion`, `user_create_id`, `created_at`, `updated_at`) VALUES
 (1, 'e9853aa1-d89d-4df4-8683-713fc2f20de2', NULL, 'admin01', '$2b$10$DWiYsN4nEGCeuDfnbwm24.nIRdHMi9uoG5EVFX.qixVCjfByolu2W', 'admin', 'ADMIN', 'REGULAR', 0, 8, NULL, '2024-03-18 12:09:14', '2024-03-18 12:09:14'),
 (2, '056aab1d-c5f5-4003-8b33-457c57e1deb9', NULL, 'agent01', '$2b$10$vff62kbaK3NI7YAg.vQmJu8Uy9SxrA14tvV.2CYCd9QqlxSdH5FIW', 'เจ้าขุนทอง AGENT', 'AGENT', 'REGULAR', 0, 1, 'e9853aa1-d89d-4df4-8683-713fc2f20de2', '2024-03-18 12:09:56', '2024-03-18 12:09:56'),
 (3, '874bc14a-272b-442c-bea5-ad34d064ce69', 'f4d11ff3-c2fc-44e3-9283-b3905ed9033a', 'member01', '$2b$10$3nghI1.QVNEddnRtwpNeOuFlslliXB2eC1xavgpWt5nVRPcweExXm', 'เจ้าขุนทอง MEMBER', 'MEMBER', 'REGULAR', 85278214, 8, '056aab1d-c5f5-4003-8b33-457c57e1deb9', '2024-03-18 12:10:41', '2024-03-18 12:10:41'),

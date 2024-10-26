@@ -37,22 +37,22 @@ export class ApiLotto {
                         SELECT
                             CONVERT_TZ(NOW(),'+00:00','+07:00') AS now, 
                             lottos.lotto_id AS l_id, 
-                            lottos.name AS l_name, 
+                            lottos.l_name AS l_name, 
                             img_flag, 
-                            open AS l_open, 
-                            close AS l_close, 
+                            l_open AS l_open, 
+                            l_close AS l_close, 
                             report, 
-                            lottos.status AS l_status , 
+                            lottos.l_status AS l_status , 
                             date_type, 
                             date_open, 
                             thai_open_date, 
                             api, 
-                            groups AS l_groups, 
+                            l_groups AS l_groups, 
                             lottos.promotion AS promotion, 
                             thai_this_times, 
                             thai_next_times, 
                             lottos.modify_commission As modify_commission, 
-                            rates_template.name AS rt_name, 
+                            rates_template.rt_name AS rt_name, 
                             rates_template.one_digits AS rt_one_digits, 
                             rates_template.two_digits AS rt_two_digits, 
                             rates_template.three_digits AS rt_three_digits, 
@@ -122,12 +122,12 @@ export class ApiLotto {
                         const sql = `
                                     SELECT 
                                         lottos.lotto_id as l_id, 
-                                        lottos.name AS l_name, 
+                                        lottos.l_name AS l_name, 
                                         lottos.img_flag AS l_img_flag, 
-                                        lottos.open AS l_open, 
-                                        lottos.close AS l_close, 
+                                        lottos.l_open AS l_open, 
+                                        lottos.l_close AS l_close, 
                                         lottos.report AS report, 
-                                        lottos.status AS status, 
+                                        lottos.l_status AS l_status, 
                                         lottos.promotion As promotion, 
                                         lottos.modify_commission As modify_commission, 
                                         lottos.date_type AS date_type, 
@@ -136,8 +136,8 @@ export class ApiLotto {
                                         lottos.thai_this_times AS thai_this_times, 
                                         lottos.thai_next_times AS thai_next_times, 
                                         lottos.api AS api, 
-                                        lottos.groups AS l_groups, 
-                                        stores.name AS s_name, 
+                                        lottos.l_groups AS l_groups, 
+                                        stores.s_name AS s_name, 
                                         CONVERT_TZ(NOW(),'+00:00','+07:00') AS now 
                                     FROM ?? 
                                     LEFT JOIN stores ON stores.store_id = ? 
@@ -220,13 +220,13 @@ export class ApiLotto {
                     if (authorize !== 401) {
                         const data = req.body as ILottoMySQL
                         const lotto: ILottoMySQL = {
-                            name: data.name,
+                            l_name: data.l_name,
                             store_id: data.store_id,
                             img_flag: data.img_flag,
                             l_open: data.l_open,
                             l_close: data.l_close,
                             report: data.report,
-                            status: data.status,
+                            l_status: data.l_status,
                             user_create_id: authorize.user_id,
                             date_type: data.date_type,
                             date_open: data.date,
@@ -236,7 +236,7 @@ export class ApiLotto {
                         if (data.date) lotto.date_open = data.date
                         if (data.thai_open_date) lotto.thai_open_date = data.thai_open_date
                         const lotto_id = v4()
-                        const attr = ["lotto_id", "store_id", "name", "img_flag", "open AS l_open", "close AS l_close", "report", "status", "date_type", "date_open", "thai_open_date", "api", "groups AS l_groups", "user_create_id"]
+                        const attr = ["lotto_id", "store_id", "l_name", "img_flag", "l_open", "l_close", "report", "l_status", "date_type", "date_open", "thai_open_date", "api", "l_groups", "user_create_id"]
                         const values = [lotto_id, data.store_id, data.name, data.img_flag, data.l_open, data.l_close, data.report, data.status.toString(), data.date_type, JSON.stringify(data.date_open!), data.thai_open_date ?? "", data.api ?? "", data.l_groups ?? "", authorize.user_id!]
                         await Helpers.insert_database("lottos", attr, values)
                             .then(async () => {
@@ -286,7 +286,7 @@ export class ApiLotto {
                         const data = req.body as ILottoMySQL
                         const where = [["lotto_id", "=", data.id]]
 
-                        await Helpers.update_database_where("lottos", [["status", "=", data.status]], where)
+                        await Helpers.update_database_where("lottos", [["l_status", "=", data.status]], where)
                             .then(() => {
                                 res.send({ statusCode: res.statusCode, message: "OK" })
                             })

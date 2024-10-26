@@ -45,12 +45,12 @@ export interface ILottoWithId extends IInitialStateWithId {
 export interface ILottoMySQL extends RowDataPacket {
     lotto_id: string
     store_id: string
-    name: string //ชื่อหวย
+    l_name: string //ชื่อหวย
     img_flag: string //สัญลักษณ์หวย(ธง)
     l_open: string //เวลาเปิดรับ
     l_close: string //เวลาปิดรับ
     report: string //เวลาผลออก
-    status: TLottoStatus //สถานะหวย
+    l_status: TLottoStatus //สถานะหวย
     date_type: TLottoDate //ชนิดวันหวยออก
     date_open?: string[] // วันเปิดรับ
     thai_open_date?: string // วันหวยออกของไทย

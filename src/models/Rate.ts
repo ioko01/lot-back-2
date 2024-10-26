@@ -34,7 +34,7 @@ export interface IRateMySQL extends RowDataPacket {
     rate_template_id?: string
     store_id: string //ไอดีร้าน
     lotto_id: string //ไอดีหวย
-    name?: string
+    rt_name?: string
     one_digits: IDigitPosition //ราคาจ่ายเลขวิ่ง ราคาจ่ายบน/ราคาจ่ายล่าง ==> {top:3, bottom: 4}
     two_digits: IDigitPosition //ราคาจ่ายเลข 2 ตัว ราคาจ่ายบน/ราคาจ่ายล่าง ==> {top:95, bottom:95}
     three_digits: IDigitPosition //ราคาจ่ายเลข 3 ตัว  ราคาจ่ายบน/ราคาจ่ายโต๊ด ==> {top:800, toad:125}

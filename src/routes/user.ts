@@ -23,15 +23,15 @@ export class ApiUser {
                 const authorize = await authorization(req, roles)
                 if (authorize) {
                     if (authorize !== 401) {
-                        const attr = "user_id, store_id, credit, fullname, role, created_at, status, user_create_id"
+                        const attr = "user_id, store_id, credit, fullname, u_role, created_at, u_status, user_create_id"
                         const [isMe] = await Helpers.select_database_where("users", attr, [["user_id", "=", authorize.user_id!]]) as IUserMySQL[]
                         if (!isMe) return res.status(202).json({ message: "don't have user" })
                         const data: IUserMySQL = {
                             credit: isMe.credit,
                             fullname: isMe.fullname,
-                            role: isMe.role,
+                            u_role: isMe.u_role,
                             created_at: isMe.created_at,
-                            status: isMe.status,
+                            u_status: isMe.u_status,
                             user_id: isMe.user_id,
                             constructor: { name: "RowDataPacket" }
                         }
@@ -149,7 +149,7 @@ export class ApiUser {
                 const authorize = await authorization(req, roles)
                 if (authorize) {
                     if (authorize !== 401) {
-                        const attr = "stores.name AS s_name, user_id, username, credit, fullname, role, `status`, users.user_create_id AS u_create, users.created_at AS create_at, users.store_id AS s_id"
+                        const attr = "stores.s_name AS s_name, user_id, username, credit, fullname, u_role, u_status, users.user_create_id AS u_create, users.created_at AS create_at, users.store_id AS s_id"
                         const join = [["stores", "stores.store_id", "=", "users.store_id"]]
                         const user = await Helpers.select_database_left_join("users", attr, join) as IUserMySQL[]
                         if (!user) return res.status(202).json({ message: "don't have user" })
@@ -160,8 +160,8 @@ export class ApiUser {
                                 user_id: u.id,
                                 credit: u.credit,
                                 fullname: u.fullname,
-                                role: u.role,
-                                status: u.status,
+                                u_role: u.u_role,
+                                u_status: u.u_status,
                                 create_at: u.create_at,
                                 constructor: { name: "RowDataPacket" }
                             })
@@ -189,19 +189,19 @@ export class ApiUser {
                 if (authorize) {
                     if (authorize !== 401) {
                         const { store } = req.params as { store: string }
-                        const attr = "stores.name AS s_name, user_id, username, credit, fullname, role, `status`, users.user_create_id AS u_create, users.created_at AS create_at, users.store_id AS s_id"
+                        const attr = "stores.s_name AS s_name, user_id, username, credit, fullname, u_role, u_status, users.user_create_id AS u_create, users.created_at AS create_at, users.store_id AS s_id"
                         const join = [["stores", "stores.store_id", "=", "users.store_id"]]
                         const user = await Helpers.select_database_left_join("users", attr, join) as IUserMySQL[]
                         if (!user) return res.status(202).json({ message: "don't have user" })
                         const sql = `
                                         SELECT
-                                            stores.name AS s_name,
+                                            stores.s_name AS s_name,
                                             user_id,
                                             username,
                                             credit,
                                             fullname,
-                                            role,
-                                            status,
+                                            u_role,
+                                            u_status,
                                             users.user_create_id AS u_create,
                                             users.created_at AS create_at,
                                             users.store_id AS s_id
@@ -242,8 +242,8 @@ export class ApiUser {
                 const role = req.params.role
                 if (authorize) {
                     if (authorize !== 401) {
-                        const attr = "user_id, fullname, status, user_create_id, created_at, store_id, role"
-                        const where = [["role", "=", role]]
+                        const attr = "user_id, fullname, u_status, user_create_id, created_at, store_id, u_role"
+                        const where = [["u_role", "=", role]]
                         const user = await Helpers.select_database_where("users", attr, where) as IUserMySQL[]
                         if (user.length === 0) return res.status(202).json({ message: "don't have user" })
                         const res_user: IUserMySQL[] = []
@@ -252,8 +252,8 @@ export class ApiUser {
                                 user_id: u.user_id,
                                 credit: u.credit,
                                 fullname: u.fullname,
-                                role: u.role,
-                                status: u.status,
+                                u_role: u.u_role,
+                                u_status: u.u_status,
                                 user_create_id: u.user_create_id,
                                 created_at: u.created_at,
                                 constructor: { name: "RowDataPacket" }
@@ -409,7 +409,7 @@ export class ApiUser {
     addUserAdmin = (url: string) => {
         router.post(url, async (req: Request, res: Response) => {
             try {
-                const getAdmin = await Helpers.select_database_where("users", "fullname", [["role", "=", TUserRoleEnum.ADMIN]]) as IUserMySQL[]
+                const getAdmin = await Helpers.select_database_where("users", "fullname", [["u_role", "=", TUserRoleEnum.ADMIN]]) as IUserMySQL[]
                 if (getAdmin.length > 0) return res.sendStatus(401)
 
                 const data = req.body as { username: string, password: string, fullname: string }
@@ -426,7 +426,7 @@ export class ApiUser {
 
                 const hashedPassword = await bcrypt.hash(data.password!, 10);
 
-                const attribures = ["user_id", "username", "u_password", "fullname", "role", "status"]
+                const attribures = ["user_id", "username", "u_password", "fullname", "u_role", "u_status"]
                 const values = [v4(), data.username, hashedPassword, data.fullname, TUserRoleEnum.ADMIN, TUserStatusEnum.REGULAR]
 
                 await Helpers.insert_database("users", attribures, values)
@@ -466,7 +466,7 @@ export class ApiUser {
                         if (user) res.sendStatus(202).send({ message: "this username has been used" })
 
                         const hashedPassword = await bcrypt.hash(data.u_password!, 10);
-                        const attr = ["user_id", "username", "u_password", "fullname", "role", "status", "user_create_id"]
+                        const attr = ["user_id", "username", "u_password", "fullname", "u_role", "u_status", "user_create_id"]
                         const values = [v4(), data.username, hashedPassword, data.fullname, TUserRoleEnum.AGENT, TUserStatusEnum.REGULAR, authorize.id]
                         await Helpers.insert_database("users", attr, values)
                             .then(() => {
@@ -585,7 +585,7 @@ export class ApiUser {
 
                         if (!stores) return res.sendStatus(403)
                         if (authorize.role === TUserRoleEnum.ADMIN) {
-                            const attr = ["user_id", "store_id", "username", "u_password", "fullname", "role", "status", "user_create_id"]
+                            const attr = ["user_id", "store_id", "username", "u_password", "fullname", "u_role", "u_status", "user_create_id"]
                             const values = [v4(), data.store_id!, data.username!, hashedPassword, data.fullname, TUserRoleEnum.MEMBER, TUserStatusEnum.REGULAR, data.user_create_id!]
                             await Helpers.insert_database("users", attr, values)
                                 .then(async () => {
@@ -798,9 +798,9 @@ export class ApiUser {
                             SELECT
                                 user_id, 
                                 fullname, 
-                                role, 
+                                u_role, 
                                 credit, 
-                                status, 
+                                u_status, 
                                 tokenVersion, 
                                 created_at, 
                                 updated_at, 
@@ -829,8 +829,8 @@ export class ApiUser {
                         )
                         if (!isPasswordValid) return res.status(202).send({ message: "invalid password" })
 
-                        const access_token = createToken(user.user_id!, user.tokenVersion!, user.role)
-                        const refresh_token = refreshToken(user.user_id!, user.tokenVersion!, user.role)
+                        const access_token = createToken(user.user_id!, user.tokenVersion!, user.u_role)
+                        const refresh_token = refreshToken(user.user_id!, user.tokenVersion!, user.u_role)
                         if (!user.tokenVersion) return res.sendStatus(403)
                         user.refresh_token = refresh_token
                         // const VITE_OPS_COOKIE_NAME = process.env.VITE_OPS_COOKIE_NAME!
@@ -856,7 +856,7 @@ export class ApiUser {
                         const data = req.body as IUserMySQL
                         if (data.user_id !== authorize.user_id) return res.sendStatus(401)
                         const tb = "users"
-                        const attr = "user_id, fullname, role, credit, status, tokenVersion, created_at, updated_at, u_password, user_create_id"
+                        const attr = "user_id, fullname, u_role, credit, u_status, tokenVersion, created_at, updated_at, u_password, user_create_id"
                         const where = [["user_id", "=", data.user_id!]]
                         const [user] = await Helpers.select_database_where(tb, attr, where) as IUserMySQL[]
 

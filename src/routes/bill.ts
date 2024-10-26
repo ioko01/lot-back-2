@@ -74,9 +74,9 @@ export class ApiBill {
                         if (parseInt(en[1]) < 10) en[1] = `0${en[1]}`
                         const date_start = moment(new Date(`${st[2]}-${st[1]}-${st[0]} 00:00:00`)).format("YYYY-MM-DD HH:mm:ss")
                         const date_end = moment(new Date(`${en[2]}-${en[1]}-${en[0]} 00:00:00`)).format("YYYY-MM-DD HH:mm:ss")
-                        const attr_bill = "rebate, price, win, times, bills.one_digits AS b_one_digits, bills.two_digits AS b_two_digits, bills.three_digits AS b_three_digits, note, `bills`.`status` AS b_status, price, win, bills.bill_id AS b_id, bills.created_at AS b_created_at, "
+                        const attr_bill = "rebate, price, win, times, bills.one_digits AS b_one_digits, bills.two_digits AS b_two_digits, bills.three_digits AS b_three_digits, note, `bills`.`b_status` AS b_status, price, win, bills.bill_id AS b_id, bills.created_at AS b_created_at, "
                         const attr_rate_template = "rates_template.one_digits AS rt_one_digits, rates_template.two_digits AS rt_two_digits, rates_template.three_digits AS rt_three_digits, bet_one_digits, bet_two_digits, bet_three_digits, "
-                        const attr_lotto = "lottos.name AS l_name, lottos.lotto_id AS l_id, lottos.promotion AS promotion, "
+                        const attr_lotto = "lottos.l_name AS l_name, lottos.lotto_id AS l_id, lottos.promotion AS promotion, "
                         const attr_commission = "commissions.one_digits AS c_one_digits, commissions.two_digits AS c_two_digits, commissions.three_digits AS c_three_digits"
                         const attr = attr_bill + attr_rate_template + attr_lotto + attr_commission
                         const join = [
@@ -118,7 +118,7 @@ export class ApiBill {
                 const authorize = await authorization(req, roles)
                 if (authorize) {
                     if (authorize !== 401) {
-                        const [lotto] = await Helpers.select_database_where("lottos", "open, CONVERT_TZ(NOW(),'+00:00','+07:00') AS now", [["lotto_id", "=", req.params.id]]) as ILottoMySQL[]
+                        const [lotto] = await Helpers.select_database_where("lottos", "l_open, CONVERT_TZ(NOW(),'+00:00','+07:00') AS now", [["lotto_id", "=", req.params.id]]) as ILottoMySQL[]
 
                         const date = moment(new Date(lotto.now).toUTCString()).utc()
 
@@ -134,9 +134,9 @@ export class ApiBill {
                         }
                         const dateTime = new Date(`${req.params.times} 00:00:00`)
 
-                        const attr_bill = "price, rebate, times, bills.one_digits AS b_one_digits, bills.two_digits AS b_two_digits, bills.three_digits AS b_three_digits, note, `bills`.`status` AS b_status, price, win, bills.bill_id AS b_id, bills.created_at AS b_created_at, "
+                        const attr_bill = "price, rebate, times, bills.one_digits AS b_one_digits, bills.two_digits AS b_two_digits, bills.three_digits AS b_three_digits, note, `bills`.`b_status` AS b_status, price, win, bills.bill_id AS b_id, bills.created_at AS b_created_at, "
                         const attr_rate_template = "rates_template.one_digits AS rt_one_digits, rates_template.two_digits AS rt_two_digits, rates_template.three_digits AS rt_three_digits, bet_one_digits, bet_two_digits, bet_three_digits, "
-                        const attr_lotto = "lottos.name AS l_name, lottos.lotto_id AS l_id, "
+                        const attr_lotto = "lottos.l_name AS l_name, lottos.lotto_id AS l_id, "
                         const attr_commission = "commissions.one_digits AS c_one_digits, commissions.two_digits AS c_two_digits, commissions.three_digits AS c_three_digits"
                         const attr = attr_bill + attr_rate_template + attr_lotto + attr_commission
                         const join = [
@@ -244,11 +244,11 @@ export class ApiBill {
                             SELECT
                                 rates_template.rate_template_id AS rt_id, 
                                 promotions.promotion_id AS p_id, 
-                                promotions.name AS p_name, 
-                                promotions.status AS p_status, 
+                                promotions.p_name AS p_name, 
+                                promotions.p_status AS p_status, 
                                 promotions.date_promotion AS p_promotion, 
                                 rates_template.commission_id AS c_id, 
-                                stores.name AS s_name, 
+                                stores.s_name AS s_name, 
                                 stores.store_id AS s_id,
                                 rates_template.one_digits AS rt_one_digits,
                                 rates_template.two_digits AS rt_two_digits,
@@ -285,7 +285,7 @@ export class ApiBill {
                                 const join = [["rates", "rates.commission_id", "=", "commissions.commission_id"]]
                                 const where = [["rates.lotto_id", "=", data.lotto_id]]
                                 const [commission] = await Helpers.select_database_left_join_where(["commissions"], attr_comminssion, join, where) as ICommissionMySQL[]
-                                const [lotto] = await Helpers.select_database_where("lottos", "open, date_type", [["lotto_id", "=", data.lotto_id]]) as ILottoMySQL[]
+                                const [lotto] = await Helpers.select_database_where("lottos", "l_open, date_type", [["lotto_id", "=", data.lotto_id]]) as ILottoMySQL[]
                                 let commissions: number = 0
                                 if (addbill.lotto_id == data.lotto_id) {
                                     if (result && JSON.parse(JSON.stringify(result))[0]?.p_promotion.includes(days[new Date(data.times.toString()).getUTCDay()])) {
@@ -376,7 +376,7 @@ export class ApiBill {
 
                                 if (authorize.credit < (price - commissions)) return res.status(202).json({ message: "no credit" })
 
-                                const attr = ["bill_id", "store_id", "lotto_id", "rate_id", "times", "one_digits", "two_digits", "three_digits", "note", "status", "price", "rebate", "user_create_id"]
+                                const attr = ["bill_id", "store_id", "lotto_id", "rate_id", "times", "one_digits", "two_digits", "three_digits", "note", "b_status", "price", "rebate", "user_create_id"]
                                 const value = [v4(), addbill.store_id!, data.lotto_id, addbill.rate_template_id!, dateTime, JSON.stringify(data.one_digits), JSON.stringify(data.two_digits), JSON.stringify(data.three_digits), data.note, "WAIT", `${price}`, `${commissions.toFixed(2)}`, authorize.user_id!]
                                 await Helpers.insert_database("bills", attr, value)
                                     .then(async () => {
@@ -436,7 +436,7 @@ export class ApiBill {
                 if (authorize) {
                     if (authorize !== 401) {
                         const data = req.body as { b_id: string }
-                        const [isBillMe] = await Helpers.select_database_where("bills", "status, bill_id, one_digits, two_digits, three_digits", [["bill_id", "=", data.b_id]]) as any[]
+                        const [isBillMe] = await Helpers.select_database_where("bills", "b_status, bill_id, one_digits, two_digits, three_digits", [["bill_id", "=", data.b_id]]) as any[]
                         if (!isBillMe) return res.sendStatus(403)
 
                         if (isBillMe.status === "CANCEL" || isBillMe.status === "REWARD") return res.status(202).json({ message: "can not delete bill" })
@@ -444,7 +444,7 @@ export class ApiBill {
 
                         if (!price) return res.status(202).json({ message: "can not delete bill" })
 
-                        await Helpers.update_database_where("bills", [["status", "=", "CANCEL"]], [["bill_id", "=", isBillMe.bill_id]])
+                        await Helpers.update_database_where("bills", [["b_status", "=", "CANCEL"]], [["bill_id", "=", isBillMe.bill_id]])
                             .then(async () => {
                                 await Helpers.update_database_where("users", [["credit", "=", authorize.credit + price]], [["user_id", "=", authorize.user_id!]])
                                     .then(() => {

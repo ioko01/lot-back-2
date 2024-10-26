@@ -36,8 +36,8 @@ export interface IUserWithId extends IInitialStateWithId {
     username: string
     password?: string
     fullname: string
-    role: TUserRole
-    status: TUserStatus
+    u_role: TUserRole
+    u_status: TUserStatus
     credit: number
     tokenVersion?: number
 }
@@ -49,8 +49,8 @@ export interface IUserMySQL extends RowDataPacket {
     username?: string
     u_password?: string
     fullname: string
-    role: TUserRole
-    status: TUserStatus
+    u_role: TUserRole
+    u_status: TUserStatus
     credit: number
     user_create_id?: string
     tokenVersion?: number

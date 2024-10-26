@@ -21,7 +21,7 @@ export class ApiPromotion {
                 const authorize = await authorization(req, roles)
                 if (authorize) {
                     if (authorize !== 401) {
-                        const attr = "rate_template_id, rates_template.name AS r_name, commission_id AS c_id, stores.name AS s_name, stores.stores_id AS s_id"
+                        const attr = "rate_template_id, rates_template.rt_name AS r_name, commission_id AS c_id, stores.s_name AS s_name, stores.stores_id AS s_id"
                         const join = [["users", "users.user_id", "=", "rates_template.user_create_id"], ["stores", "stores.user_create_id", "=", "users.user_id"]]
 
                         const rates = await Helpers.select_database_left_join_where(["rates_template"], attr, join, [["user_create_id", "=", authorize.user_id!]])
@@ -55,11 +55,11 @@ export class ApiPromotion {
                                     SELECT
                                         rates_template.rate_template_id AS rt_id, 
                                         promotions.promotion_id AS p_id, 
-                                        promotions.name AS p_name, 
-                                        promotions.status AS p_status, 
+                                        promotions.p_name AS p_name, 
+                                        promotions.p_status AS p_status, 
                                         promotions.date_promotion AS p_promotion, 
                                         rates_template.commission_id AS c_id, 
-                                        stores.name AS s_name, 
+                                        stores.s_name AS s_name, 
                                         stores.store_id AS s_id,
                                         rates_template.one_digits AS rt_one_digits,
                                         rates_template.two_digits AS rt_two_digits,
@@ -125,11 +125,11 @@ export class ApiPromotion {
                                     SELECT
                                         rates_template.rate_template_id AS rt_id, 
                                         promotions.promotion_id AS p_id, 
-                                        promotions.name AS p_name, 
-                                        promotions.status AS p_status, 
+                                        promotions.p_name AS p_name, 
+                                        promotions.p_status AS p_status, 
                                         promotions.date_promotion AS p_promotion, 
                                         rates_template.commission_id AS c_id, 
-                                        stores.name AS s_name, 
+                                        stores.s_name AS s_name, 
                                         stores.store_id AS s_id,
                                         rates_template.one_digits AS rt_one_digits,
                                         rates_template.two_digits AS rt_two_digits,
@@ -145,7 +145,7 @@ export class ApiPromotion {
                                     LEFT JOIN stores ON stores.user_create_id = ?? AND stores.store_id = ?
                                     LEFT JOIN rates_template ON rates_template.rate_template_id = ??
                                     LEFT JOIN commissions ON commissions.commission_id = ??
-                                    WHERE promotions.store_id = ? AND promotions.status = ?
+                                    WHERE promotions.store_id = ? AND promotions.p_status = ?
                                     `
                         const fields = ["promotions", "promotions.user_create_id", "users.user_id", store, "promotions.rate_template_id", "rates_template.commission_id", store, "USED"]
                         // const connection = createPool({
@@ -190,7 +190,7 @@ export class ApiPromotion {
                 const authorize = await authorization(req, roles)
                 if (authorize) {
                     if (authorize !== 401) {
-                        const attr = "rate_template_id, rates_template.name AS r_name, commission_id AS c_id, stores.name AS s_name, stores.store_id AS s_id"
+                        const attr = "rate_template_id, rates_template.rt_name AS r_name, commission_id AS c_id, stores.s_name AS s_name, stores.store_id AS s_id"
                         const join = [["users", "users.user_id", "=", "rates_template.user_create_id"], ["stores", "stores.user_create_id", "=", "users.user_id"]]
                         const rates = await Helpers.select_database_left_join("rates_template", attr, join)
                         if (!rates) return res.status(202).json({ message: "don't have rate" })
@@ -226,7 +226,7 @@ export class ApiPromotion {
                             user_create_id = promotion.agent_id
                         }
 
-                        const attr = ["promotion_id", "store_id", "rate_template_id", "name", "date_promotion", "user_create_id"]
+                        const attr = ["promotion_id", "store_id", "rate_template_id", "p_name", "date_promotion", "user_create_id"]
                         const value = [v4(), promotion.store_id, promotion.rate_template_id, promotion.name, JSON.stringify(promotion.date_promotion!), user_create_id]
                         await Helpers.insert_database("promotions", attr, value)
                             .then(async () => {
@@ -260,11 +260,11 @@ export class ApiPromotion {
                         } else if (authorize.role === "ADMIN") {
                             user_create_id = promotion.agent_id
                         }
-                        const attr = [["status", "=", "NOT_USED"]]
+                        const attr = [["p_status", "=", "NOT_USED"]]
                         const where = [["store_id", "=", promotion.store_id!]]
                         await Helpers.update_database_where("promotions", attr, where)
                             .then(async () => {
-                                const attr = [["status", "=", promotion.status]]
+                                const attr = [["p_status", "=", promotion.status]]
                                 const where = [["promotion_id", "=", promotion.promotion_id!], ["user_create_id", "=", user_create_id]]
                                 await Helpers.update_database_where("promotions", attr, where)
                                     .then(async () => {

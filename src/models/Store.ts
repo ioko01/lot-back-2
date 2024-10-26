@@ -13,7 +13,7 @@ export interface IStoreWithId extends IInitialStateWithId {
 
 export interface IStoreMySQL extends RowDataPacket {
     store_id: string
-    name: string //ชื่อร้าน
+    s_name: string //ชื่อร้าน
     logo: string //โลโก้ร้าน
     user_create_id?: string
 }

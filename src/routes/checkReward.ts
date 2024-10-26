@@ -68,7 +68,7 @@ export class ApiCheckReward {
                         const date_start = new Date(`${st[2]}-${st[1]}-${st[0]} 00:00:00`)
                         const date_end = new Date(`${en[2]}-${en[1]}-${en[0]} 23:59:59`)
                         const attr_check_reward = "check_reward_id, times, top, bottom, "
-                        const attr_lotto = "lottos.lotto_id AS l_id, lottos.name AS l_name, open, close, report, api"
+                        const attr_lotto = "lottos.lotto_id AS l_id, lottos.l_name AS l_name, l_open, l_close, report, api"
                         const attr = attr_check_reward + attr_lotto
                         if (authorize.role == "ADMIN") store_id = store
                         const sql = `SELECT ${attr} FROM ?? LEFT JOIN lottos ON lottos.lotto_id = check_rewards.lotto_id AND lottos.store_id = ? WHERE times >= ? AND times <= ?`
@@ -112,7 +112,7 @@ export class ApiCheckReward {
                 const authorize = await authorization(req, roles)
                 if (authorize) {
                     if (authorize !== 401) {
-                        const [lotto] = await Helpers.select_database_where("lottos", "open, CONVERT_TZ(NOW(),'+00:00','+07:00') AS now", [["lotto_id", "=", req.params.id]]) as ILottoMySQL[]
+                        const [lotto] = await Helpers.select_database_where("lottos", "l_open, CONVERT_TZ(NOW(),'+00:00','+07:00') AS now", [["lotto_id", "=", req.params.id]]) as ILottoMySQL[]
 
                         const date = moment(new Date(lotto.now).toUTCString()).utc()
 
@@ -133,7 +133,7 @@ export class ApiCheckReward {
                         const dateEnd = new Date(`${date.format("YYYY")}-${monthEnd}-${dayEnd} 00:00:00`)
 
                         const attr_check_rewards = "times, top, bottom, "
-                        const attr_lotto = "lottos.name AS l_name, lottos.lotto_id AS l_id"
+                        const attr_lotto = "lottos.l_name AS l_name, lottos.lotto_id AS l_id"
                         const attr = attr_check_rewards + attr_lotto
                         const join = [["lottos", "check_rewards.lotto_id", "=", "lottos.lotto_id"]]
                         const where = [
@@ -327,11 +327,11 @@ export class ApiCheckReward {
                                         SELECT
                                             rates_template.rate_template_id AS rt_id, 
                                             promotions.promotion_id AS p_id, 
-                                            promotions.name AS p_name, 
-                                            promotions.status AS p_status, 
+                                            promotions.p_name AS p_name, 
+                                            promotions.p_status AS p_status, 
                                             promotions.date_promotion AS p_promotion, 
                                             rates_template.commission_id AS c_id, 
-                                            stores.name AS s_name, 
+                                            stores.s_name AS s_name, 
                                             stores.store_id AS s_id,
                                             rates_template.one_digits AS rt_one_digits,
                                             rates_template.two_digits AS rt_two_digits,
@@ -513,7 +513,7 @@ export class ApiCheckReward {
                                                 const price = this.calculateReward(JSON.parse(bill.b_one_digits!), JSON.parse(bill.b_two_digits!), JSON.parse(bill.b_three_digits!), data.top, data.bottom, rt_one_digits.toString(), rt_two_digits.toString(), rt_three_digits.toString())
                                                 const attr = [["win", "=", price.total_win]]
                                                 const where = [
-                                                    ["status", "!=", "CANCEL"],
+                                                    ["b_status", "!=", "CANCEL"],
                                                     ["bill_id", "=", bill.b_id]
                                                 ]
                                                 await Helpers.update_database_where("bills", attr, where)
@@ -526,12 +526,12 @@ export class ApiCheckReward {
 
 
 
-                                    const attr = [["status", "=", "REWARD"]]
+                                    const attr = [["b_status", "=", "REWARD"]]
                                     const where = [
                                         ["lotto_id", "=", data.l_id],
                                         ["times", ">=", date_start],
                                         ["times", "<=", date_end],
-                                        ["status", "=", "WAIT"]
+                                        ["b_status", "=", "WAIT"]
                                     ]
 
                                     await Helpers.update_database_where("bills", attr, where)

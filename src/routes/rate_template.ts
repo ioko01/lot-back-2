@@ -61,7 +61,7 @@ export class ApiRateTemplate {
                 const authorize = await authorization(req, roles)
                 if (authorize) {
                     if (authorize !== 401) {
-                        const attr = "rate_template_id, rates_template.name AS r_name, commission_id AS c_id, stores.name AS s_name, stores.stores_id AS s_id"
+                        const attr = "rate_template_id, rates_template.rt_name AS r_name, commission_id AS c_id, stores.s_name AS s_name, stores.stores_id AS s_id"
                         const join = [["users", "users.user_id", "=", "rates_template.user_create_id"], ["stores", "stores.user_create_id", "=", "users.user_id"]]
 
                         const rates = await Helpers.select_database_left_join_where(["rates_template"], attr, join, [["user_create_id", "=", authorize.user_id!]])
@@ -94,9 +94,9 @@ export class ApiRateTemplate {
                         const sql = `
                                     SELECT
                                         rate_template_id, 
-                                        rates_template.name AS r_name, 
+                                        rates_template.rt_name AS r_name, 
                                         rates_template.commission_id AS c_id, 
-                                        stores.name AS s_name, 
+                                        stores.s_name AS s_name, 
                                         stores.store_id AS s_id,
                                         rates_template.one_digits AS rt_one_digits,
                                         rates_template.two_digits AS rt_two_digits,
@@ -157,7 +157,7 @@ export class ApiRateTemplate {
                 const authorize = await authorization(req, roles)
                 if (authorize) {
                     if (authorize !== 401) {
-                        const attr = "rate_template_id, rates_template.name AS r_name, commission_id AS c_id, stores.name AS s_name, stores.store_id AS s_id"
+                        const attr = "rate_template_id, rates_template.rt_name AS r_name, commission_id AS c_id, stores.s_name AS s_name, stores.store_id AS s_id"
                         const join = [["users", "users.user_id", "=", "rates_template.user_create_id"], ["stores", "stores.user_create_id", "=", "users.user_id"]]
                         const rates = await Helpers.select_database_left_join("rates_template", attr, join)
                         if (!rates) return res.status(202).json({ message: "don't have rate" })
@@ -222,7 +222,7 @@ export class ApiRateTemplate {
                         }
                         const commission_id = v4()
 
-                        const attr = ["rate_template_id", "store_id", "commission_id", "name", "one_digits", "two_digits", "three_digits", "bet_one_digits", "bet_two_digits", "bet_three_digits", "user_create_id"]
+                        const attr = ["rate_template_id", "store_id", "commission_id", "rt_name", "one_digits", "two_digits", "three_digits", "bet_one_digits", "bet_two_digits", "bet_three_digits", "user_create_id"]
                         const value = [v4(), rate.store_id, commission_id, rate.name, JSON.stringify(rate.one_digits), JSON.stringify(rate.two_digits), JSON.stringify(rate.three_digits), JSON.stringify(rate.bet_one_digits), JSON.stringify(rate.bet_two_digits), JSON.stringify(rate.bet_three_digits), user_create_id]
                         await Helpers.insert_database("rates_template", attr, value)
                             .then(async () => {

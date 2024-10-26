@@ -35,9 +35,9 @@ export interface IPromotionMySQL extends RowDataPacket {
     promotion_id?: string
     rate_template_id?: string
     store_id?: string //ไอดีร้าน
-    name?: string
+    p_name?: string
     date_promotion?: string[] // วันที่จัดโปรโมชั่น
-    status: TPromotionStatus,
+    p_status: TPromotionStatus,
     committion_id?: string
     user_create_id?: string
 }
