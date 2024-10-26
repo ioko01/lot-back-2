@@ -196,8 +196,8 @@ router.post('/auth/refresh', async (req: Request, res: Response, next: NextFunct
     }, async (err: any, decoded: string | jwt.JwtPayload | undefined | IToken) => {
         if (err) return res.sendStatus(401)
         const decode = decoded as IToken
-        const access_token = createToken(decode.UID!, decode.tokenVersion!, decode.role)
-        const refresh_token = refreshToken(decode.UID!, decode.tokenVersion!, decode.role)
+        const access_token = createToken(decode.UID!, decode.tokenVersion!, decode.u_role)
+        const refresh_token = refreshToken(decode.UID!, decode.tokenVersion!, decode.u_role)
         // const VITE_OPS_COOKIE_NAME = process.env.VITE_OPS_COOKIE_NAME!
         return res
             .status(200)

@@ -31,7 +31,7 @@ export async function authorization(req: Request, roles: TUserRole[]) {
                 }
                 if (user.store_id) Object.assign(isUser, { store_id: user.store_id } as IUserDocWithId)
                 if (user.user_create_id) Object.assign(isUser, { admin_create_id: user.admin_create_id } as IUserDocWithId)
-                if (roles.includes(decodedToken.role)) return isUser
+                if (roles.includes(decodedToken.u_role)) return isUser
                 return 401
             }
             return 401
