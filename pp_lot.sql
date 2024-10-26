@@ -6,7 +6,7 @@
 -- Generation Time: Oct 24, 2024 at 04:48 PM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 7.4.33
-
+USE pp_lot;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `pf-lotto`
+-- Database: `pp_lot`
 --
 
 -- --------------------------------------------------------
@@ -34,9 +34,9 @@ CREATE TABLE `bills` (
   `lotto_id` varchar(255) NOT NULL COMMENT 'ไอดีเรทราคา',
   `rate_id` varchar(255) NOT NULL COMMENT 'ไอดีเรทราคา',
   `times` datetime NOT NULL DEFAULT current_timestamp() COMMENT 'งวดที่ออก',
-  `one_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT 'เลขวิ่ง ตัวเลข/ราคาบน/ราคาล่าง ==> [1:5000:5000, 3:5000:0]' CHECK (json_valid(`one_digits`)),
-  `two_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT 'เลข 2 ตัว ตัวเลข/ราคาบน/ราคาล่าง [01:5:5, 10:5:5, 02:10:5, 20:10:5]' CHECK (json_valid(`two_digits`)),
-  `three_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT 'เลข 3 ตัว ตัวเลข/ราคาบน/ราคาจ่ายโต๊ด [011:5:5, 101:5:5, 025:5:5, 205:5:5]' CHECK (json_valid(`three_digits`)),
+  `one_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'เลขวิ่ง ตัวเลข/ราคาบน/ราคาล่าง ==> [1:5000:5000, 3:5000:0]' CHECK (json_valid(`one_digits`)),
+  `two_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'เลข 2 ตัว ตัวเลข/ราคาบน/ราคาล่าง [01:5:5, 10:5:5, 02:10:5, 20:10:5]' CHECK (json_valid(`two_digits`)),
+  `three_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'เลข 3 ตัว ตัวเลข/ราคาบน/ราคาจ่ายโต๊ด [011:5:5, 101:5:5, 025:5:5, 205:5:5]' CHECK (json_valid(`three_digits`)),
   `note` varchar(255) DEFAULT NULL COMMENT 'หมายเหตุ',
   `status` enum('WAIT','CANCEL','REWARD') DEFAULT 'WAIT' COMMENT 'สถานะ',
   `price` varchar(255) NOT NULL DEFAULT '0' COMMENT 'ราคาบิล',
@@ -74,9 +74,9 @@ CREATE TABLE `check_rewards` (
 CREATE TABLE `commissions` (
   `id` int(11) NOT NULL COMMENT 'เลขรัน',
   `commission_id` varchar(255) NOT NULL COMMENT 'ไอดีค่าคอมมิชชั่น',
-  `one_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT 'ค่าคอมเลขวิ่ง ค่าคอมบน/ค่าคอมล่าง ==> {top:3, bottom: 4}' CHECK (json_valid(`one_digits`)),
-  `two_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT 'ค่าคอมเลข 2 ตัว ค่าคอมบน/ค่าคอมล่าง ==> {top:95, bottom:95}' CHECK (json_valid(`two_digits`)),
-  `three_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT 'ค่าคอมเลข 3 ตัว  ค่าคอมบน/ค่าคอมโต๊ด ==> {top:800, toad:125}' CHECK (json_valid(`three_digits`)),
+  `one_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'ค่าคอมเลขวิ่ง ค่าคอมบน/ค่าคอมล่าง ==> {top:3, bottom: 4}' CHECK (json_valid(`one_digits`)),
+  `two_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'ค่าคอมเลข 2 ตัว ค่าคอมบน/ค่าคอมล่าง ==> {top:95, bottom:95}' CHECK (json_valid(`two_digits`)),
+  `three_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'ค่าคอมเลข 3 ตัว  ค่าคอมบน/ค่าคอมโต๊ด ==> {top:800, toad:125}' CHECK (json_valid(`three_digits`)),
   `user_create_id` varchar(255) DEFAULT NULL COMMENT 'ไอดีผู้สร้าง',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -106,9 +106,9 @@ CREATE TABLE `digits_close` (
   `rate_id` varchar(255) NOT NULL COMMENT 'ไอดีเรทราคา',
   `percent` int(11) DEFAULT 0 COMMENT 'เปอร์เซ้นต์การจ่าย ค่าเริ่มต้น 0',
   `times` datetime NOT NULL DEFAULT current_timestamp() COMMENT 'งวดที่ออก',
-  `one_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT 'วิ่ง ==> {top: [1, 2, 3], bottom: [1, 2, 3]}' CHECK (json_valid(`one_digits`)),
-  `two_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT '2 ตัว {top: [01, 22, 63], bottom: [81, 52, 63]}' CHECK (json_valid(`two_digits`)),
-  `three_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT '3 ตัว {top: [051, 222, 631], toad:[831, 542, 673]}' CHECK (json_valid(`three_digits`)),
+  `one_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'วิ่ง ==> {top: [1, 2, 3], bottom: [1, 2, 3]}' CHECK (json_valid(`one_digits`)),
+  `two_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT '2 ตัว {top: [01, 22, 63], bottom: [81, 52, 63]}' CHECK (json_valid(`two_digits`)),
+  `three_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT '3 ตัว {top: [051, 222, 631], toad:[831, 542, 673]}' CHECK (json_valid(`three_digits`)),
   `user_create_id` varchar(255) DEFAULT NULL COMMENT 'ไอดีผู้สร้าง',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -163,9 +163,9 @@ CREATE TABLE `digits_semi` (
   `rate_id` varchar(255) NOT NULL COMMENT 'ไอดีเรทราคา',
   `percent` int(11) DEFAULT 50 COMMENT 'เปอร์เซ้นต์การจ่าย ค่าเริ่มต้น 50',
   `times` datetime NOT NULL DEFAULT current_timestamp() COMMENT 'งวดที่ออก',
-  `one_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT 'วิ่ง ==> {top: [1, 2, 3], bottom: [1, 2, 3]}' CHECK (json_valid(`one_digits`)),
-  `two_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT '2 ตัว {top: [01, 22, 63], bottom: [81, 52, 63]}' CHECK (json_valid(`two_digits`)),
-  `three_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT '3 ตัว {top: [051, 222, 631], toad:[831, 542, 673]}' CHECK (json_valid(`three_digits`)),
+  `one_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'วิ่ง ==> {top: [1, 2, 3], bottom: [1, 2, 3]}' CHECK (json_valid(`one_digits`)),
+  `two_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT '2 ตัว {top: [01, 22, 63], bottom: [81, 52, 63]}' CHECK (json_valid(`two_digits`)),
+  `three_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT '3 ตัว {top: [051, 222, 631], toad:[831, 542, 673]}' CHECK (json_valid(`three_digits`)),
   `user_create_id` varchar(255) DEFAULT NULL COMMENT 'ไอดีผู้สร้าง',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -190,7 +190,7 @@ CREATE TABLE `lottos` (
   `report` varchar(20) NOT NULL COMMENT 'เวลาผลออก',
   `status` enum('OPEN','CLOSE') NOT NULL DEFAULT 'OPEN' COMMENT 'สถานะหวย',
   `date_type` enum('SELECT_DATE','THAI') NOT NULL DEFAULT 'SELECT_DATE' COMMENT 'ชนิดวันหวยออก',
-  `date_open` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT 'วันเปิดรับ [''sunday'', ''monday'' ,...]' CHECK (json_valid(`date_open`)),
+  `date_open` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'วันเปิดรับ [''sunday'', ''monday'' ,...]' CHECK (json_valid(`date_open`)),
   `thai_open_date` varchar(255) DEFAULT NULL COMMENT 'วันหวยออกของไทย',
   `thai_this_times` datetime DEFAULT NULL COMMENT 'หวยไทยงวดนี้',
   `thai_next_times` datetime DEFAULT NULL COMMENT 'หวยไทยงวดถัดไป',
@@ -289,7 +289,7 @@ CREATE TABLE `promotions` (
   `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ชื่อโปรโมชั่น',
   `store_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ไอดีร้านค้า',
   `rate_template_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ไอดีเทมเพลตเรทราคา',
-  `date_promotion` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT 'วันที่จัดโปรโมชั่น' CHECK (json_valid(`date_promotion`)),
+  `date_promotion` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'วันที่จัดโปรโมชั่น' CHECK (json_valid(`date_promotion`)),
   `status` enum('USED','NOT_USED') CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'NOT_USED' COMMENT 'สถานะการใช้งาน',
   `user_create_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ไอดีผู้สร้าง',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -412,12 +412,12 @@ CREATE TABLE `rates_template` (
   `commission_id` varchar(255) NOT NULL COMMENT 'ไอดีค่าคอมมิชชั่น',
   `store_id` varchar(255) NOT NULL COMMENT 'ไอดีร้าน',
   `name` varchar(255) NOT NULL COMMENT 'ชื่อเทมเพลท',
-  `one_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT 'ราคาจ่ายเลขวิ่ง ราคาจ่ายบน/ราคาจ่ายล่าง ==> {top:3, bottom: 4}' CHECK (json_valid(`one_digits`)),
-  `two_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT 'ราคาจ่ายเลข 2 ตัว ราคาจ่ายบน/ราคาจ่ายล่าง ==> {top:95, bottom:95}' CHECK (json_valid(`two_digits`)),
-  `three_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT 'ราคาจ่ายเลข 3 ตัว  ราคาจ่ายบน/ราคาจ่ายโต๊ด ==> {top:800, toad:125}' CHECK (json_valid(`three_digits`)),
-  `bet_one_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT 'อัตาแทงต่ำสุด/สูงสุด/รับได้เยอะสุด เลขวิ่ง ==> {top: 1:100000:100000, bottom: 1:100000:100000, toad: 1:100000:100000}' CHECK (json_valid(`bet_one_digits`)),
-  `bet_two_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT 'อัตาแทงต่ำสุด/สูงสุด/รับได้เยอะสุด เลข 2 ตัว ==> {top: 1:100000:100000, bottom: 1:100000:100000, toad: 1:100000:100000}' CHECK (json_valid(`bet_two_digits`)),
-  `bet_three_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '{}' COMMENT 'อัตาแทงต่ำสุด/สูงสุด/รับได้เยอะสุด เลข 3 ตัว ==> {top: 1:100000:100000, bottom: 0:0:0, toad: 1:100000:100000}' CHECK (json_valid(`bet_three_digits`)),
+  `one_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'ราคาจ่ายเลขวิ่ง ราคาจ่ายบน/ราคาจ่ายล่าง ==> {top:3, bottom: 4}' CHECK (json_valid(`one_digits`)),
+  `two_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'ราคาจ่ายเลข 2 ตัว ราคาจ่ายบน/ราคาจ่ายล่าง ==> {top:95, bottom:95}' CHECK (json_valid(`two_digits`)),
+  `three_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'ราคาจ่ายเลข 3 ตัว  ราคาจ่ายบน/ราคาจ่ายโต๊ด ==> {top:800, toad:125}' CHECK (json_valid(`three_digits`)),
+  `bet_one_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'อัตาแทงต่ำสุด/สูงสุด/รับได้เยอะสุด เลขวิ่ง ==> {top: 1:100000:100000, bottom: 1:100000:100000, toad: 1:100000:100000}' CHECK (json_valid(`bet_one_digits`)),
+  `bet_two_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'อัตาแทงต่ำสุด/สูงสุด/รับได้เยอะสุด เลข 2 ตัว ==> {top: 1:100000:100000, bottom: 1:100000:100000, toad: 1:100000:100000}' CHECK (json_valid(`bet_two_digits`)),
+  `bet_three_digits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT ('{}') COMMENT 'อัตาแทงต่ำสุด/สูงสุด/รับได้เยอะสุด เลข 3 ตัว ==> {top: 1:100000:100000, bottom: 0:0:0, toad: 1:100000:100000}' CHECK (json_valid(`bet_three_digits`)),
   `user_create_id` varchar(255) DEFAULT NULL COMMENT 'ไอดีผู้สร้าง',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp()

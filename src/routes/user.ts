@@ -818,7 +818,6 @@ export class ApiUser {
                 // })
                 connections.getConnection((err, connection) => {
                     connection.query(sql, ["users", data.username], async (err, result, field) => {
-                        connection.release();
 
                         if (err) return res.status(202).json(err);
                         const [user] = result as IUserMySQL[]
