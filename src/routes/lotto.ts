@@ -360,7 +360,7 @@ export class ApiLotto {
                             user_create_id = promotion.agent_id
                         }
 
-                        const attr = [["modify_commission", "=", promotion.status]]
+                        const attr = [["modify_commission", "=", promotion.p_status]]
                         const where = [["lotto_id", "=", promotion.lotto_id!], ["store_id", "=", promotion.store_id!]]
                         await Helpers.update_database_where("lottos", attr, where)
                             .then(async () => {
