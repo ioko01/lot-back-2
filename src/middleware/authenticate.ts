@@ -28,17 +28,17 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
 }
 
 
-export const createToken = (UID: string, tokenVersion: number, role: TUserRole) => {
-    const access_token = jwt.sign({ UID, tokenVersion, role }, process.env.ACCESS_TOKEN_SECRET!, {
+export const createToken = (UID: string, tokenVersion: number, u_role: TUserRole) => {
+    const access_token = jwt.sign({ UID, tokenVersion, u_role }, process.env.ACCESS_TOKEN_SECRET!, {
         algorithm: "HS256",
         expiresIn: "15m",
     });
     return access_token;
 };
 
-export const refreshToken = (UID: string, tokenVersion: number, role: TUserRole) => {
+export const refreshToken = (UID: string, tokenVersion: number, u_role: TUserRole) => {
     const r = v4()
-    return jwt.sign({ UID, tokenVersion, role, r }, process.env.REFRESH_TOKEN_SECRET!, {
+    return jwt.sign({ UID, tokenVersion, u_role, r }, process.env.REFRESH_TOKEN_SECRET!, {
         algorithm: "HS256",
         expiresIn: "1h",
     });

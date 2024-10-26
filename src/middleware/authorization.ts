@@ -15,7 +15,7 @@ export async function authorization(req: Request, roles: TUserRole[]) {
             const decodedToken = jwt_decode<IToken>(token)
             const Helpers = new HelperController()
             const tb = "users"
-            const attr = "user_id, store_id, user_create_id,  fullname, role, credit, status, tokenVersion, created_at, updated_at, u_password"
+            const attr = "user_id, store_id, user_create_id,  fullname, u_role, credit, u_status, tokenVersion, created_at, updated_at, u_password"
             const where = [["user_id", "=", decodedToken.UID]]
             const [user] = await Helpers.select_database_where(tb, attr, where) as IUserMySQL[]
 
@@ -24,8 +24,8 @@ export async function authorization(req: Request, roles: TUserRole[]) {
                     credit: user.credit,
                     fullname: user.fullname,
                     id: decodedToken.UID,
-                    role: user.role,
-                    status: user.status,
+                    u_role: user.u_role,
+                    u_status: user.u_status,
                     user_id: user.user_id,
                     constructor: { name: "RowDataPacket" },
                 }
