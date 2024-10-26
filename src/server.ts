@@ -230,32 +230,6 @@ router.get("/", (_: any, res: Response) => {
 APP.use("/", router)
 
 server.listen(PORT, () => {
-    const sql = `
-                    SELECT
-                        user_id, 
-                        fullname, 
-                        role, 
-                        credit, 
-                        status, 
-                        tokenVersion, 
-                        created_at, 
-                        updated_at, 
-                        u_password, 
-                        user_create_id
-                    FROM users
-                    `;
-
-    connections.getConnection((err, connection) => {
-        connection.query(sql, [], async (err, result, field) => {
-
-            if (err) console.log(err);
-            const [user] = result as IUserMySQL[]
-            if (!user) console.log("no account");
-
-            console.log(user);
-        });
-        connection.release();
-    });
     console.log(`⚡️[server]: Example app listening on port ${PORT}`)
 })
 // export const handler = serverless(APP);
