@@ -240,8 +240,7 @@ router.get("/users", (_: any, res: Response) => {
                                 updated_at, 
                                 u_password, 
                                 user_create_id
-                            FROM ??
-                            WHERE username = ?
+                            FROM users
                             `;
     const connection = createConnection({
         host: process.env.VITE_OPS_DATABASE_HOST,
