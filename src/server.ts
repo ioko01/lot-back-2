@@ -226,9 +226,11 @@ router.get("/", (_: any, res: Response) => {
     res.send("Welcome to API")
 })
 
-router.get("/users", (req: Request, res: Response) => {
-    try {
-        const sql = `
+
+APP.use("/", router)
+
+server.listen(PORT, () => {
+    const sql = `
                     SELECT
                         user_id, 
                         fullname, 
@@ -243,30 +245,17 @@ router.get("/users", (req: Request, res: Response) => {
                     FROM users
                     `;
 
-        connections.getConnection((err, connection) => {
-            connection.query(sql, [], async (err, result, field) => {
+    connections.getConnection((err, connection) => {
+        connection.query(sql, [], async (err, result, field) => {
 
-                if (err) return res.status(202).json(err);
-                const [user] = result as IUserMySQL[]
-                if (!user) return res.status(202).send({ message: "no account" })
+            if (err) console.log(err);
+            const [user] = result as IUserMySQL[]
+            if (!user) console.log("no account");
 
-
-                // const VITE_OPS_COOKIE_NAME = process.env.VITE_OPS_COOKIE_NAME!
-                return res
-                    .status(200)
-                    .send({ user })
-            });
-            connection.release();
+            console.log(user);
         });
-
-    } catch (err: any) {
-        res.send(err)
-    }
-})
-
-APP.use("/", router)
-
-server.listen(PORT, () => {
+        connection.release();
+    });
     console.log(`⚡️[server]: Example app listening on port ${PORT}`)
 })
 // export const handler = serverless(APP);

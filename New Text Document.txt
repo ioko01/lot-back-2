@@ -1,0 +1,2 @@
+ALTER USER 'pplot'@'localhost' IDENTIFIED WITH caching_sha2_password BY 'password';
+select User, plugin from mysql.user;
