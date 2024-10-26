@@ -136,7 +136,7 @@ export class ApiLotto {
                                         lottos.thai_this_times AS thai_this_times, 
                                         lottos.thai_next_times AS thai_next_times, 
                                         lottos.api AS api, 
-                                        lottos.groups AS groups, 
+                                        lottos.groups AS l_groups, 
                                         stores.name AS s_name, 
                                         CONVERT_TZ(NOW(),'+00:00','+07:00') AS now 
                                     FROM ?? 

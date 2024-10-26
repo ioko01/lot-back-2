@@ -227,42 +227,6 @@ router.get("/", (_: any, res: Response) => {
     res.send("Welcome to API")
 })
 
-router.get("/users", (_: any, res: Response) => {
-    const sql = `
-                            SELECT
-                                user_id, 
-                                fullname, 
-                                role, 
-                                credit, 
-                                status, 
-                                tokenVersion, 
-                                created_at, 
-                                updated_at, 
-                                u_password, 
-                                user_create_id
-                            FROM users
-                            `;
-    const connection = createConnection({
-        host: process.env.VITE_OPS_DATABASE_HOST,
-        user: process.env.VITE_OPS_DATABASE_USERNAME,
-        password: process.env.VITE_OPS_DATABASE_PASSWORD,
-        database: process.env.VITE_OPS_DATABASE_NAME,
-        port: parseInt(process.env.VITE_OPS_DATABASE_PORT!),
-    })
-    connection.query(sql, [], async (err, result, field) => {
-
-        if (err) return res.status(202).json(err);
-        const [user] = result as IUserMySQL[]
-        if (!user) return res.status(202).send({ message: "no account" })
-        return res
-            .status(200)
-            .send("OK")
-    });
-
-})
-
-
-
 
 APP.use("/", router)
 
@@ -273,3 +237,4 @@ server.listen(PORT, () => {
 // export const handler: Handler = (event: any, context: any) => {
 //     proxy(server, event, context);
 // };
+                                    
