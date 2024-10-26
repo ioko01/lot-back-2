@@ -130,7 +130,7 @@ export class ApiStore {
                             storeAndOwner = {
                                 store_id: user.s_id,
                                 logo: user.logo,
-                                u_name: user.u_name,
+                                s_name: user.s_name,
                                 user_create_id: user.u_id,
                                 fullname: user.fullname,
                                 constructor: { name: "RowDataPacket" }
