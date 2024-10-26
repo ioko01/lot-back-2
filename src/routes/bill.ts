@@ -265,7 +265,7 @@ export class ApiBill {
                             LEFT JOIN stores ON stores.user_create_id = ?? AND stores.store_id = ?
                             LEFT JOIN rates_template ON rates_template.rate_template_id = ??
                             LEFT JOIN commissions ON commissions.commission_id = ??
-                            WHERE promotions.store_id = ? AND promotions.status = ?
+                            WHERE promotions.store_id = ? AND promotions.p_status = ?
                             `
                         const fields = ["promotions", "promotions.user_create_id", "users.user_id", data.store_id, "promotions.rate_template_id", "rates_template.commission_id", data.store_id, "USED"]
                         // const connection = createPool({
